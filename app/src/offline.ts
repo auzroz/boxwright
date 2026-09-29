@@ -393,7 +393,7 @@ export async function switchConnection(next: Connection): Promise<void> {
   // but before the new connection becomes current, in one synchronous step:
   // switching first and undoing it afterwards left a window in which a flush
   // could send that capture to the new server. Refusing here keeps enqueue
-  // unable to fail. (Raised twice by review on PR #1.)
+  // unable to fail. (Raised twice in review before the public release.)
   await saveConnection(next, () => {
     refuseWhileWaiting();
     if (!moving) return;

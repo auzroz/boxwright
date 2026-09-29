@@ -380,7 +380,7 @@ describe("switching servers", () => {
     expect(cachedBoxes()).toHaveLength(1);
   });
 
-  // Raised by review on PR #1. A refresh asked of the old server can answer
+  // Raised in review before the public release. A refresh asked of the old server can answer
   // after the switch; written, it would put the old inventory's boxes back as
   // the offline picks for the new one.
   test("a refresh from the server just left does not repopulate the caches", async () => {
@@ -402,7 +402,7 @@ describe("switching servers", () => {
     expect(keys()).not.toContain("categories.v1");
   });
 
-  // Also raised by review on PR #1. The queue is checked before the Keychain
+  // Also raised in review before the public release. The queue is checked before the Keychain
   // write, which is async; a capture queued in that gap belongs to the old
   // inventory, so the switch has to be undone rather than carry it across.
   test("a capture queued during the Keychain write undoes the switch", async () => {
@@ -427,7 +427,7 @@ describe("switching servers", () => {
     spy.mockRestore();
   });
 
-  // Raised again by review on PR #1, against the fix above: switching first
+  // Raised again in review before the public release, against the fix above: switching first
   // and undoing it afterwards still left the new server current for as long
   // as the undoing Keychain write took, and a flush already running sent its
   // next capture there.

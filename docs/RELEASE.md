@@ -63,7 +63,7 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
       captures.** Start from `deploy/kubernetes/boxwright.yaml`. The
       maintainer's cluster runs it from home-ops
       (`kubernetes/apps/documents/boxwright`, auzroz/home-ops#288), pinned to
-      `sha-f7a25fc...`. This is the
+      the `sha-<commit>` tag of a `main` build, never a floating tag. This is the
       end-to-end test nothing else provides: live Homebox, real photos, real
       signal in a real storage unit.
 - [x] **Scripted end-to-end pass, API half** (`make e2e`,
@@ -109,8 +109,9 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
       Release build opened on the server screen on an iOS 27.2 iPhone. It
       found that the iOS 27 SDK will not launch an app without the UIScene
       life cycle ("UIScene life cycle is required for apps built with this
-      SDK"): fixed in 85a2bad. `ios.yml` compiles on an older Xcode and
-      could not have seen it.
+      SDK"): fixed before the public release (AppDelegate.swift's
+      SceneDelegate). `ios.yml` compiles on an older Xcode and could not have
+      seen it.
 - [ ] **Create the app record** in App Store Connect (My Apps > +, bundle id
       `app.boxwright`, SKU anything) and an **App Store Connect API key**
       (Users and Access > Integrations, App Manager). Keep the `.p8` outside
@@ -141,12 +142,22 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
   | Wrong token / Homebox down / `AI_PROVIDER=none` | Each gets its own sentence on the test result |
   | Camera permission denied | Alert with Open Settings, no crash |
   | Choose an existing photo | System picker, no permission prompt; the photo is filed with the item |
-| Paste a copied image (long-press an image in Safari, Copy) | iOS "Allow Paste" prompt only on tap; the image is filed like a photo |
-| Take a shelf of several items, park it, open it from the list later | Identified in the background; per-item thumbnails line up with their items |
+  | Paste a copied image (long-press an image in Safari, Copy) | iOS "Allow Paste" prompt only on tap; the image is filed like a photo |
+  | Take a shelf of several items, park it, open it from the list later | Identified in the background; per-item thumbnails line up with their items |
+  | Take photo on a LiDAR iPhone | Boxwright's own camera opens, with "Use the system camera" one tap away; a phone without LiDAR gets the system camera |
+  | A boxed item (e.g. a shoebox) at ~0.8 m, 45 degrees | Review card says "measured with LiDAR"; within ~1.5 cm of a tape measure on each side |
+  | A shelf of several items, each located by the model | Each measured separately; an item the model did not locate keeps its estimate |
+  | Record container sizes: tick several, "New type...", "27 gal", inside size | Type, 102 L and the inside size show on every ticked container, and in Homebox |
+  | File into a container of known size | Done screen asks "How full is it now?"; an answer is saved and wins over Boxwright's own estimate |
+  | Measure, over an open container of known inside size | Guide and tilt shown; refuses past 30 degrees from straight down; within ~10 points of what you see |
+  | A photo's depth file after review | Gone from the app's captures directory once the capture is filed, queued or discarded |
   | Photo filed to Homebox | 1024px on its longest edge, no location in its EXIF |
   | Capture in airplane mode, file to a cached box, reconnect, foreground | Queue drains; item in Homebox with its photo |
   | Change server with a capture queued | Refused with the reason; token-only change allowed |
   | Force-quit and relaunch | Server settings and queue both survive |
+
+  The LiDAR rows are the first real test of the camera module and the
+  measurement: until now both ran only against synthetic depth frames.
 
   The two Tailscale-IP and MagicDNS rows are the ones not settled by reading
   Apple's documentation; the settings-screen wording in
