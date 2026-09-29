@@ -1,0 +1,133 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# There is no container runtime on the primary dev machine, so CI is the only
+# place the Docker image is ever built. Treat a red docker job as a real break.
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: Format
+        run: |
+          out="$(cd backend && gofmt -l .)"
+          if [ -n "$out" ]; then echo "gofmt needed:"; echo "$out"; exit 1; fi
+      - name: Vet
+        run: cd backend && go vet ./... && go vet -tags e2e ./e2e
+      - name: Test
+        run: cd backend && go test -race ./...
+      - name: Build
+        run: cd backend && go build ./...
+
+  # The scripted end-to-end gate from docs/RELEASE.md, on every PR: the real
+  # server binary against a real Homebox v0.26.2 -- identify, recommend,
+  # catalog with a photo, a partial failure resent and deduplicated, status,
+  # and the change feed -- with each outcome read back from Homebox itself.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      homebox:
+        image: ghcr.io/sysadminsmedia/homebox:0.26.2
+        env:
+          # CI-only; nothing here outlives the job.
+          HBOX_AUTH_API_KEY_PEPPER: ci-only-pepper-0123456789abcdefghij
+          HBOX_OPTIONS_GITHUB_RELEASE_CHECK: "false"
+        ports:
+          - 7745:7745
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: Wait for Homebox
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:7745/api/v1/status > /dev/null && exit 0
+            sleep 2
+          done
+          echo "::error::Homebox did not come up"; exit 1
+      - name: End-to-end
+        run: make e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t boxwright:ci .
+
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      # `npm ci` installs exactly the committed lockfile. The previous bare
+      # install resolved "*" specifiers fresh on every run, which
+      # made this job non-deterministic and could go red with no repo change.
+      - name: Install
+        working-directory: app
+        run: npm ci
+      # The LiDAR module's native glue (modules/boxwright-depth/nitrogen/) is
+      # generated from its TypeScript specs and committed, because pod install
+      # and the iOS build need it. A spec edited without regenerating would
+      # build against the old contract; regenerate here and fail on any
+      # difference. nitrogen is pinned to the exact react-native-nitro-modules
+      # version, and uses no formatter, so its output is byte-stable.
+      - name: Nitrogen output is current
+        working-directory: app/modules/boxwright-depth
+        run: |
+          node ../../node_modules/nitrogen/lib/index.js
+          git diff --exit-code -- nitrogen
+          untracked="$(git status --porcelain --untracked-files=all -- nitrogen)"
+          if [ -n "$untracked" ]; then
+            echo "::error::nitrogen generated files that are not committed:"
+            echo "$untracked"
+            exit 1
+          fi
+      - name: Typecheck
+        working-directory: app
+        run: npm run typecheck
+      # Every app defect found so far -- captures filed after being discarded,
+      # photos deleted from a quarantined queue, the picker offering a box the
+      # engine excludes -- was caught by reading the code. Review does not run
+      # on every commit; this does.
+      - name: Test
+        working-directory: app
+        run: npm test
+      # The committed Info.plist and privacy manifest carry promises to the
+      # user (no extra permission prompts, strict ATS, no data collected).
+      # Compiling the app is ios.yml's job, on macOS.
+      - name: iOS config
+        working-directory: app
+        run: npm run check:ios
+
+  # CONTRIBUTING.md mandates DCO sign-off; nothing enforced it until now.
+  dco:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check Signed-off-by on every commit in the PR
+        run: |
+          missing=0
+          for sha in $(git rev-list --no-merges \
+              "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"); do
+            if ! git log -1 --format=%B "$sha" | grep -qiE '^Signed-off-by: .+ <.+@.+>$'; then
+              echo "missing Signed-off-by: $sha $(git log -1 --format=%s "$sha")"
+              missing=1
+            fi
+          done
+          exit $missing

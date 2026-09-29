@@ -1,0 +1,188 @@
+{
+  "page": -1,
+  "pageSize": 500,
+  "total": 3,
+  "items": [
+    {
+      "id": "0000000d-0000-4000-8000-00000000000d",
+      "assetId": "000-134",
+      "name": "Sample Item 3",
+      "description": "",
+      "quantity": 1,
+      "insured": false,
+      "archived": false,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "purchasePrice": 0,
+      "parent": {
+        "id": "0000000b-0000-4000-8000-00000000000b",
+        "assetId": "000-012",
+        "name": "Sample Item 4",
+        "description": "",
+        "quantity": 0,
+        "insured": false,
+        "archived": false,
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z",
+        "purchasePrice": 0,
+        "tags": [],
+        "soldDate": ""
+      },
+      "entityType": {
+        "id": "00000001-0000-4000-8000-000000000001",
+        "name": "Item",
+        "description": "",
+        "isLocation": false,
+        "icon": "",
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z"
+      },
+      "tags": [
+        {
+          "id": "0000000e-0000-4000-8000-00000000000e",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 5",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        },
+        {
+          "id": "00000010-0000-4000-8000-000000000010",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 6",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        }
+      ],
+      "imageId": "00000011-0000-4000-8000-000000000011",
+      "thumbnailId": "00000012-0000-4000-8000-000000000012",
+      "soldDate": ""
+    },
+    {
+      "id": "00000013-0000-4000-8000-000000000013",
+      "assetId": "000-019",
+      "name": "Sample Item 7",
+      "description": "",
+      "quantity": 1,
+      "insured": false,
+      "archived": false,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "purchasePrice": 0,
+      "parent": {
+        "id": "0000000b-0000-4000-8000-00000000000b",
+        "assetId": "000-012",
+        "name": "Sample Item 8",
+        "description": "",
+        "quantity": 0,
+        "insured": false,
+        "archived": false,
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z",
+        "purchasePrice": 0,
+        "tags": [],
+        "soldDate": ""
+      },
+      "entityType": {
+        "id": "00000001-0000-4000-8000-000000000001",
+        "name": "Item",
+        "description": "",
+        "isLocation": false,
+        "icon": "",
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z"
+      },
+      "tags": [
+        {
+          "id": "0000000e-0000-4000-8000-00000000000e",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 9",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        },
+        {
+          "id": "00000014-0000-4000-8000-000000000014",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 10",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        }
+      ],
+      "imageId": "00000015-0000-4000-8000-000000000015",
+      "thumbnailId": "00000016-0000-4000-8000-000000000016",
+      "soldDate": ""
+    },
+    {
+      "id": "00000017-0000-4000-8000-000000000017",
+      "assetId": "000-118",
+      "name": "Sample Item 11",
+      "description": "",
+      "quantity": 1,
+      "insured": false,
+      "archived": false,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "purchasePrice": 0,
+      "parent": {
+        "id": "0000000b-0000-4000-8000-00000000000b",
+        "assetId": "000-012",
+        "name": "Sample Item 12",
+        "description": "",
+        "quantity": 0,
+        "insured": false,
+        "archived": false,
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z",
+        "purchasePrice": 0,
+        "tags": [],
+        "soldDate": ""
+      },
+      "entityType": {
+        "id": "00000001-0000-4000-8000-000000000001",
+        "name": "Item",
+        "description": "",
+        "isLocation": false,
+        "icon": "",
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z"
+      },
+      "tags": [
+        {
+          "id": "0000000e-0000-4000-8000-00000000000e",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 13",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        },
+        {
+          "id": "00000010-0000-4000-8000-000000000010",
+          "parentId": "0000000f-0000-4000-8000-00000000000f",
+          "name": "Sample Item 14",
+          "description": "",
+          "color": "",
+          "icon": "",
+          "createdAt": "2026-01-01T00:00:00Z",
+          "updatedAt": "2026-01-01T00:00:00Z"
+        }
+      ],
+      "imageId": "00000018-0000-4000-8000-000000000018",
+      "thumbnailId": "00000019-0000-4000-8000-000000000019",
+      "soldDate": ""
+    }
+  ],
+  "totalPrice": 0
+}

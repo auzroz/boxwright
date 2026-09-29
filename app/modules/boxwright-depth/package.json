@@ -1,0 +1,31 @@
+{
+  "name": "boxwright-depth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LiDAR capture for Boxwright: an ARKit camera view that writes a photo and its depth, as a Nitro module.",
+  "main": "src/index",
+  "react-native": "src/index",
+  "source": "src/index",
+  "types": "src/index.ts",
+  "files": [
+    "src",
+    "ios/**/*.swift",
+    "nitrogen",
+    "nitro.json",
+    "react-native.config.js",
+    "*.podspec"
+  ],
+  "homepage": "https://github.com/auzroz/boxwright",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/auzroz/boxwright.git",
+    "directory": "app/modules/boxwright-depth"
+  },
+  "author": "Boxwright contributors",
+  "license": "AGPL-3.0-only",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": "0.37.1"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  // For checking this package on its own:
+  //   node ../../node_modules/typescript/bin/tsc -p .
+  // The app's tsconfig does not include it; the app sees it only through
+  // test/boxwright-depth.ts (types) and, once installed, src/index.ts.
+  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "jsx": "react-native",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "esnext",
+    "types": [],
+    "verbatimModuleSyntax": true
+  }
+}

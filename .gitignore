@@ -1,0 +1,10 @@
+.env
+*.log
+backend/boxwright
+app/node_modules/
+.DS_Store
+storage.txt
+app/.env
+
+# Scratch git worktrees used by parallel agent runs.
+.claude/worktrees/

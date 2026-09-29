@@ -1,0 +1,47 @@
+# Development stack: Boxwright backend + a local Homebox instance.
+# First run: open http://localhost:7745, register a user, create an API key
+# (Profile -> API keys), put it in .env as HOMEBOX_API_KEY, then
+# `docker compose restart backend`.
+#
+# Optional local AI: `docker compose --profile ai up` starts Ollama; then
+# `docker compose exec ollama ollama pull gemma3:4b` and set
+# AI_PROVIDER=ollama, AI_BASE_URL=http://ollama:11434, AI_MODEL=gemma3:4b.
+
+services:
+  homebox:
+    # No `v`: the image tags are 0.26.2, 0.26, latest. `v0.26.2` is the git
+    # tag and the release-binary path, and pulling it is "manifest unknown".
+    image: ghcr.io/sysadminsmedia/homebox:0.26.2
+    environment:
+      # API keys will not work (and Homebox may refuse to start) without a
+      # 32+ character pepper. CHANGE THIS; treat it like a secret.
+      - HBOX_AUTH_API_KEY_PEPPER=${HBOX_AUTH_API_KEY_PEPPER:-dev-only-pepper-change-me-32chars!}
+    ports:
+      - "7745:7745"
+    volumes:
+      - homebox-data:/data
+    restart: unless-stopped
+
+  backend:
+    build: .
+    env_file: .env
+    environment:
+      - HOMEBOX_BASE_URL=http://homebox:7745/api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - homebox
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  homebox-data:
+  ollama-data:

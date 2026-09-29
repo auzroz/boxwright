@@ -1,0 +1,138 @@
+# Boxwright backend on Kubernetes -- an example, not a chart.
+#
+# Assumes a Homebox v0.26.x already reachable from the cluster. Edit the
+# namespace, HOMEBOX_BASE_URL and how the Service is exposed to match yours,
+# then create the Secret (never commit it):
+#
+#   kubectl -n boxwright create secret generic boxwright \
+#     --from-literal=BOXWRIGHT_API_TOKEN="$(openssl rand -base64 32)" \
+#     --from-literal=HOMEBOX_API_KEY=hb_... \
+#     --from-literal=AI_API_KEY=            # empty unless AI_PROVIDER needs one
+#
+# The image is multi-arch (linux/amd64, linux/arm64), so it schedules on a Pi.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: boxwright
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boxwright
+  namespace: boxwright
+data:
+  # Binding beyond loopback is what makes the token mandatory; the server
+  # refuses to start with 0.0.0.0 and no BOXWRIGHT_API_TOKEN.
+  LISTEN_ADDR: "0.0.0.0"
+  PORT: "8080"
+  HOMEBOX_BASE_URL: "http://homebox.homebox.svc.cluster.local:7745/api"
+  AI_PROVIDER: "none"          # openai | ollama | anthropic | none
+  AI_BASE_URL: ""
+  AI_MODEL: ""
+  BOX_CACHE_TTL: "5m"
+  # Holds one WebSocket open from this pod to HOMEBOX_BASE_URL + /v1/ws/events
+  # and refreshes the box index when Homebox reports a change, so an edit in
+  # Homebox's own UI is noticed in seconds rather than after BOX_CACHE_TTL.
+  # The connection is OUTBOUND, so the Ingress below needs nothing for it.
+  # What it does need: egress to Homebox that allows a long-lived connection
+  # (mind an egress NetworkPolicy), and, if HOMEBOX_BASE_URL goes through a
+  # reverse proxy instead of the in-cluster Service above, a proxy that passes
+  # the Upgrade header. Any failure falls back to BOX_CACHE_TTL on its own;
+  # /healthz stays 200 and reports changeFeed: connected | degraded | disabled.
+  HOMEBOX_WATCH: "true"
+  ALLOW_CLIENT_HOMEBOX: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boxwright
+  namespace: boxwright
+spec:
+  # ONE replica, replaced rather than rolled. Filing is idempotent through a
+  # key stored in Homebox, but the claim that stops two concurrent retries of
+  # the same capture racing each other lives in process memory
+  # (internal/api/dedupe.go). Two pods -- including the brief overlap of a
+  # rolling update -- could each file the same item once. The app queues
+  # through the few seconds of downtime a Recreate costs. The lock that stops
+  # two filings into one container from each adding to the same starting fill
+  # is in process memory too.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: boxwright }
+  template:
+    metadata:
+      labels: { app: boxwright }
+    spec:
+      # A catalog request killed mid-write leaves an entity in Homebox with no
+      # record here of whether it landed; the server drains for up to 20s, and
+      # closes the change-feed socket on the way out.
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: boxwright
+          image: ghcr.io/auzroz/boxwright:0.1.0
+          ports:
+            - { name: http, containerPort: 8080 }
+          envFrom:
+            - configMapRef: { name: boxwright }
+            - secretRef: { name: boxwright }
+          # /healthz answers 200 whatever the change feed is doing, so a
+          # Homebox outage never takes this pod out of service or restarts it.
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            # Photos are capped at upload and held in memory while a vision
+            # model is asked about them; this leaves room for a few at once.
+            limits: { memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            # Large multipart uploads spill to os.TempDir.
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: boxwright
+  namespace: boxwright
+spec:
+  selector: { app: boxwright }
+  ports:
+    - { name: http, port: 8080, targetPort: http }
+---
+# The phone needs HTTPS to anything that is not an IP address or a .local name
+# (iOS App Transport Security), so the Service above is not enough on its own.
+# With the Tailscale Kubernetes operator installed, this Ingress gives it a
+# tailnet name and a certificate, and the app's server address becomes
+# https://boxwright.<your-tailnet>.ts.net. Otherwise, replace it with your own
+# ingress and TLS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: boxwright
+  namespace: boxwright
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: boxwright
+      port: { number: 8080 }
+  tls:
+    - hosts: [boxwright]

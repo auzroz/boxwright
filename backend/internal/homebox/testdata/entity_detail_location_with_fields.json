@@ -1,0 +1,86 @@
+{
+  "parent": {
+    "id": "00000008-0000-4000-8000-000000000008",
+    "assetId": "000-005",
+    "name": "Garage",
+    "description": "",
+    "quantity": 1,
+    "insured": false,
+    "archived": false,
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "purchasePrice": 0,
+    "entityType": {
+      "id": "00000002-0000-4000-8000-000000000002",
+      "name": "Location",
+      "description": "",
+      "isLocation": true,
+      "icon": "",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    "tags": [],
+    "soldDate": ""
+  },
+  "id": "00000007-0000-4000-8000-000000000007",
+  "name": "Sample Item 15",
+  "description": "",
+  "quantity": 0,
+  "insured": false,
+  "archived": false,
+  "createdAt": "2026-01-01T00:00:00Z",
+  "updatedAt": "2026-01-01T00:00:00Z",
+  "purchasePrice": 0,
+  "entityType": {
+    "id": "00000002-0000-4000-8000-000000000002",
+    "name": "Location",
+    "description": "",
+    "isLocation": true,
+    "icon": "",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  },
+  "tags": [],
+  "assetId": "",
+  "syncChildEntityLocations": false,
+  "serialNumber": "",
+  "modelNumber": "",
+  "manufacturer": "",
+  "lifetimeWarranty": false,
+  "warrantyExpires": "",
+  "warrantyDetails": "",
+  "purchaseDate": "",
+  "purchaseFrom": "",
+  "soldDate": "",
+  "soldTo": "",
+  "soldPrice": 0,
+  "soldNotes": "",
+  "notes": "",
+  "attachments": [],
+  "fields": [
+    {
+      "id": "0000001a-0000-4000-8000-00000000001a",
+      "type": "number",
+      "name": "capacityUnits",
+      "textValue": "",
+      "numberValue": 8,
+      "booleanValue": false
+    },
+    {
+      "id": "0000001b-0000-4000-8000-00000000001b",
+      "type": "boolean",
+      "name": "fragileSafe",
+      "textValue": "",
+      "numberValue": 0,
+      "booleanValue": true
+    },
+    {
+      "id": "0000001c-0000-4000-8000-00000000001c",
+      "type": "text",
+      "name": "access",
+      "textValue": "easy",
+      "numberValue": 0,
+      "booleanValue": false
+    }
+  ]
+}

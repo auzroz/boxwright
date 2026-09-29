@@ -1,0 +1,13 @@
+{
+  "uiViewClassName": "DepthCamera",
+  "supportsRawText": false,
+  "bubblingEventTypes": {},
+  "directEventTypes": {},
+  "validAttributes": {
+    "mode": true,
+    "active": true,
+    "torch": true,
+    "onStatus": true,
+    "hybridRef": true
+  }
+}

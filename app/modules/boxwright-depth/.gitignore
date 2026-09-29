@@ -1,0 +1,3 @@
+# Nothing is built here; nitrogen/ is generated but COMMITTED (CI checks it
+# is current), because the iOS build and pod install both need it.
+lib/

@@ -1,0 +1,23 @@
+# Xcode
+build/
+xcuserdata
+DerivedData
+*.xcuserstate
+**/.xcode.env.local
+*.ipa
+*.dSYM.zip
+
+# CocoaPods / Bundler: Podfile.lock IS committed, Pods/ is not.
+ios/Pods/
+vendor/bundle/
+
+# fastlane output
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots
+ios/fastlane/test_output
+ios/build/
+
+# Metro
+*.jsbundle
+.metro-health-check*

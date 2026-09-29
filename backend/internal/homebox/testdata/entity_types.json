@@ -1,0 +1,20 @@
+[
+  {
+    "id": "00000001-0000-4000-8000-000000000001",
+    "name": "Item",
+    "description": "",
+    "isLocation": false,
+    "icon": "",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  },
+  {
+    "id": "00000002-0000-4000-8000-000000000002",
+    "name": "Location",
+    "description": "",
+    "isLocation": true,
+    "icon": "",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  }
+]

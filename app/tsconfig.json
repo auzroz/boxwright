@@ -1,0 +1,17 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    // Test files use jest's globals. Listed explicitly rather than left to
+    // @types auto-discovery, so adding a dependency cannot quietly change what
+    // the app itself compiles against.
+    "types": ["jest"]
+  },
+  "include": [
+    "App.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "test/**/*.ts"
+  ]
+}

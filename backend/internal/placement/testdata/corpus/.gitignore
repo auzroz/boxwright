@@ -1,0 +1,9 @@
+# A real corpus is a list of someone's possessions, photographed in their home,
+# with the room each one is stored in. That is not ours to publish, and it is
+# not useful to anyone else either. Only the synthetic pair is committed;
+# everything else here -- real.corpus, its box snapshot, any photos -- stays
+# local by default rather than by remembering.
+*
+!.gitignore
+!synthetic.corpus
+!synthetic.boxes.json

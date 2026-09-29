@@ -1,0 +1,128 @@
+name: release
+
+# Publishes a multi-arch image to GHCR.
+#
+# Deliberately built and exercised long before there is anything to release.
+# There is no container runtime on the primary dev machine, so CI is the only
+# place this can ever run -- and multi-arch publishing that debuts on release
+# day is a release-day outage. Trigger it by hand as often as you like; every
+# run produces a pullable `edge` and a sha-tagged image.
+#
+# linux/arm64 is not optional: three of the four nodes this is deployed to are
+# arm64 Pis.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+concurrency:
+  # A second tag pushed while the first is publishing would race for the same
+  # `latest`. Queue instead, and never cancel a run that may already have
+  # pushed half a manifest.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ci.yml runs on pushes to main and on pull requests, neither of which
+  # includes a tag push. Without this, a tag cut from a red commit publishes
+  # happily.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - run: cd backend && go vet ./...
+      - run: cd backend && go test -race ./...
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # GHCR rejects an uppercase path, and github.repository carries the
+      # owner's own casing -- which is fine here and would break a fork.
+      - id: image
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      # Only the runtime stage needs emulating: the build stage pins itself to
+      # the BUILD platform and cross-compiles (see Dockerfile), because the
+      # binary is stdlib-only and CGO_ENABLED=0.
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.ref }}
+          # latest=auto keeps a pre-release tag (v0.1.0-rc1) from claiming
+          # `latest`, which is exactly the tag this pipeline exists to rehearse
+          # with.
+          flavor: latest=auto
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=edge,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=sha,format=long
+
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          # The semver tag on a release, `edge` on a manual run; reported by
+          # GET /api/v1/status so the app can show what it is talking to.
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The point of the job is the arm64 half, and a manifest with only amd64
+      # in it pushes and reports success just the same. Fail here instead of
+      # discovering it when a Pi refuses to pull.
+      - name: Verify both architectures are in the manifest
+        run: |
+          set -euo pipefail
+          ref="${{ steps.image.outputs.ref }}@${{ steps.build.outputs.digest }}"
+          echo "inspecting $ref"
+          docker buildx imagetools inspect "$ref" --raw > manifest.json
+          cat manifest.json
+          for want in linux/amd64 linux/arm64; do
+            os="${want%/*}"; arch="${want#*/}"
+            if ! jq -e --arg os "$os" --arg arch "$arch" \
+                '.manifests[]? | select(.platform.os == $os and .platform.architecture == $arch)' \
+                manifest.json > /dev/null; then
+              echo "::error::$want is missing from the published manifest"
+              exit 1
+            fi
+            echo "$want present"
+          done
+
+      - name: Summary
+        run: |
+          {
+            echo "### Published"
+            echo
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo
+            echo "digest: \`${{ steps.build.outputs.digest }}\`"
+            echo
+            echo "Pull with: \`docker pull ${{ steps.image.outputs.ref }}:edge\`"
+          } >> "$GITHUB_STEP_SUMMARY"

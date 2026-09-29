@@ -1,0 +1,129 @@
+# SYNTHETIC corpus -- invented, committed, and NOT evidence about the engine.
+#
+# It exists so the harness itself runs in CI and on every contributor's
+# machine: the parser, the scorer, the floor ratchet and the failure report are
+# all exercised by this file, whether or not anyone has a real corpus. The
+# owner's real corpus lives beside it as real.corpus, describes actual
+# belongings, and is gitignored (see .gitignore in this directory).
+#
+# Do not read the agreement rates below as a measurement of recommendation
+# quality. Six invented items chosen by the same person who chose the weights
+# prove nothing about the weights. Only photographs of real things, answered by
+# someone who has to live with where they end up, do that.
+#
+# The photo paths are not real files. Scoring reads only the draft fields, so a
+# corpus can be exercised without shipping images.
+
+boxes: synthetic.boxes.json
+
+# Measured against DefaultWeights: 4/6 top-1, 5/6 top-3. Written rounded down,
+# which the one-item ratchet tolerance accepts.
+top1-floor: 0.6600
+top3-floor: 0.8300
+
+# Boxes available, for reference while you answer:
+#   Tools 1    Row A  easy   4/8 used  tools x6
+#   Kitchen 1  Row A  normal 2/8 used  kitchen x5
+#   Books 1    Row B  normal 6/8 used  books-media x9
+#   Empty 1    Row B  deep   0/8 used
+#   Misc 1     Row C  deep   7/8 used  other x3
+
+# 1. The easy case: like-with-like, room to spare. If this ever misses,
+# category affinity has stopped being the dominant signal.
+photo: photos/drill.jpg
+name: Cordless drill
+category: tools
+size: M
+fragile: no
+weight: medium
+quantity: 1
+confidence: 0.91
+notes: DeWalt DCD771, with battery
+box: Tools 1
+
+# 2. Fragile, and a quantity that matters. Tools 1 and Misc 1 are both recorded
+# crush-risk, so neither may be offered however convenient it looks. Three
+# stacks cost 3 x M = 6 units, which Kitchen 1 has exactly; at eight stacks
+# nothing here would fit and the right answer would become a new container.
+photo: photos/plates.jpg
+name: Stack of dinner plates
+category: kitchen
+size: M
+fragile: yes
+weight: light
+quantity: 3
+confidence: 0.84
+notes: white stoneware, three stacks
+box: Kitchen 1
+
+# 3. An exact capacity fit: Books 1 has room for precisely this and no
+# headroom bonus at all. Affinity alone has to carry it.
+photo: photos/paperbacks.jpg
+name: Paperback novels
+category: books-media
+size: M
+fragile: no
+weight: medium
+quantity: 1
+confidence: 0.78
+notes:
+box: Books 1
+
+# 4. A category no box holds and our vocabulary does not ship. The right answer
+# is the empty tote, which is how a camping tote comes to exist.
+photo: photos/camp-stove.jpg
+name: Camping stove
+category: camping
+size: M
+fragile: no
+weight: medium
+quantity: 1
+confidence: 0.72
+notes: Coleman two-burner
+box: Empty 1
+
+# 5. A DELIBERATE disagreement, kept so the failure report is exercised in CI
+# and so the tension is written down somewhere. Empty 1 is already the answer
+# for camping gear above; a person filling a unit wants holiday decorations in
+# their own labelled container, not sharing the one empty tote with a stove.
+# The engine's empty-box bonus (1.75) clears MinViableScore on its own, so it
+# offers Empty 1 and suppresses the new-container suggestion. Whether that
+# bonus is too strong is exactly the question a real corpus should settle.
+photo: photos/holiday-lights.jpg
+name: Box of holiday string lights
+category: seasonal-holiday
+size: M
+fragile: no
+weight: light
+quantity: 1
+confidence: 0.88
+notes:
+box: new
+
+# 6. Top-3 but not top-1: cookbooks read as books-media, and the engine files
+# them with the books. Keeping them with the kitchen things is a legitimate
+# human answer the engine ranks third -- the case that makes the two metrics
+# say different things.
+photo: photos/cookbook.jpg
+name: Cookbook
+category: books-media
+size: S
+fragile: no
+weight: light
+quantity: 1
+confidence: 0.80
+notes: Joy of Cooking
+box: Kitchen 1
+
+# 7. Unreviewed on purpose: an unanswered entry must be skipped, not counted as
+# a miss. Leave box: blank here.
+photo: photos/unknown-thing.jpg
+name: unknown item
+category: other
+size: M
+fragile: no
+weight: medium
+quantity: 1
+confidence: 0.00
+notes:
+box:

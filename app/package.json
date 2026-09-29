@@ -1,0 +1,44 @@
+{
+  "name": "boxwright-app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "react-native start",
+    "ios": "react-native run-ios",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "check:ios": "scripts/check-ios-config.sh"
+  },
+  "dependencies": {
+    "@react-native-clipboard/clipboard": "^1.16.3",
+    "@react-native-community/image-editor": "^4.3.1",
+    "boxwright-depth": "file:modules/boxwright-depth",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-file-access": "^4.0.4",
+    "react-native-image-picker": "^8.2.1",
+    "react-native-keychain": "^10.0.0",
+    "react-native-mmkv": "^4.3.2",
+    "react-native-nitro-modules": "^0.37.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "20.1.0",
+    "@react-native-community/cli-platform-ios": "20.1.0",
+    "@react-native/babel-preset": "0.86.3",
+    "@react-native/metro-config": "0.86.3",
+    "@react-native/typescript-config": "0.86.3",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.2.18",
+    "babel-jest": "^30.5.1",
+    "jest": "^30.5.1",
+    "nitrogen": "0.37.1",
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": ">= 22.11.0"
+  }
+}

@@ -1,0 +1,57 @@
+# Boxwright storage outline — OPTIONAL.
+#
+# This is for someone starting from an empty Homebox and nothing else. If you
+# already have locations set up, skip it entirely: open the app, tap "Choose
+# locations", and tick the ones Boxwright may file into. Boxwright never needs
+# to have created your structure to work with it.
+#
+# Two spaces per level. Blank lines and # comments are ignored.
+# Copy this to storage.txt, edit it, then:
+#
+#     make bootstrap          # show what would change, write nothing
+#     make bootstrap-apply    # create and annotate
+#
+# Both targets read storage.txt (gitignored), NOT this file, and both need
+# HOMEBOX_BASE_URL and HOMEBOX_API_KEY in the environment -- source your .env
+# first. The dry run writes nothing, so always look at it before -apply.
+#
+# Re-running is safe: a location that already exists under the same parent is
+# reused, not duplicated, so you can add to the outline and run it again. A
+# re-run never re-asserts anything the outline is silent about, so tuning a
+# location in Homebox — or turning it off in the app — is not undone.
+#
+# The deepest level is a container this outline is declaring, and creating one
+# opts it in to automated placement. Anything with children is structure as far
+# as the OUTLINE is concerned; that is not a rule about your Homebox, and you
+# can still tick such a location in the app if you file things at that level.
+#
+# Optional settings on a container:
+#
+#   access=easy|normal|deep   how much effort it is to reach
+#   capacity=N                capacity units (S=1 M=2 L=4 XL=8); default 8
+#   heavySafe=true|false      can it take heavy things
+#   fragileSafe=true|false    padded, not crushable, top of stack
+#
+# LEAVE heavySafe AND fragileSafe OUT WHEN YOU DO NOT KNOW. Unset means
+# "unknown" and the box stays in the running with a caveat. Guessing false
+# excludes it from every heavy or fragile item permanently.
+#
+# Name containers however you like — there is no scheme here to adopt. One idea
+# worth stealing, whatever you choose: keep names distinct enough to survive a
+# peeled label. No two containers in a group sharing a first letter, and none in
+# a building sharing their first two, makes a half-read label still findable.
+
+Garage
+  Shelf A
+    Bin 1           access=easy   heavySafe=true
+    Bin 2           access=normal
+    Bin 3           access=deep
+  Shelf B
+    Bin 4           access=easy
+    Bin 5           access=deep   fragileSafe=true
+
+Hall closet         access=easy
+
+Basement
+  Under the stairs  access=deep   heavySafe=true
+  Workbench         access=normal

@@ -1,0 +1,55 @@
+# Builds Boxwright and uploads it to TestFlight, from the maintainer's Mac.
+#
+# Nothing here talks to a build service: the archive is made by this machine's
+# Xcode and signed with this machine's Apple account (Xcode > Settings >
+# Accounts). Automatic signing, so there is no certificate or profile to manage
+# by hand, and none in the repository.
+#
+#   cd app && bundle install && (cd ios && bundle exec pod install)
+#   cd ios && bundle exec fastlane beta
+#
+# Upload authenticates with an App Store Connect API key (Users and Access >
+# Integrations > App Store Connect API, "App Manager" role). Keep the .p8
+# outside the repo and point at it:
+#
+#   export ASC_KEY_ID=ABC123DEFG
+#   export ASC_ISSUER_ID=00000000-0000-0000-0000-000000000000
+#   export ASC_KEY_PATH=~/.appstoreconnect/AuthKey_ABC123DEFG.p8
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build a release archive and upload it to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: File.expand_path(ENV.fetch("ASC_KEY_PATH")),
+    )
+
+    # Build numbers only have to increase per marketing version. Asking
+    # TestFlight for the last one means two Macs, or a lost local counter,
+    # can never upload a duplicate. Passed as a build setting rather than
+    # written into the project, so an upload never leaves the tree dirty.
+    build_number = latest_testflight_build_number(api_key: api_key, initial_build_number: 0) + 1
+
+    build_app(
+      workspace: "Boxwright.xcworkspace",
+      scheme: "Boxwright",
+      configuration: "Release",
+      export_method: "app-store",
+      # -allowProvisioningUpdates lets Xcode create or refresh the signing
+      # certificate and profile for app.boxwright on the account signed in
+      # to Xcode.
+      xcargs: "CURRENT_PROJECT_VERSION=#{build_number} -allowProvisioningUpdates",
+      output_directory: "build",
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      # Internal testers only for 0.1 (docs/RELEASE.md, decision 3), so
+      # there is nothing to wait for.
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end

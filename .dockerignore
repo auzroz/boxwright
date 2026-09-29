@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+app
+docs
+*.md
+.env
+.env.*
+!.env.example
+backend/boxwright
+**/.DS_Store

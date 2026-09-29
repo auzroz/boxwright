@@ -1,0 +1,26 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["boxwrightdepth"],
+  "ios": {
+    "iosModuleName": "BoxwrightDepth"
+  },
+  "android": {
+    "androidNamespace": ["boxwrightdepth"],
+    "androidCxxLibName": "BoxwrightDepth"
+  },
+  "autolinking": {
+    "DepthKit": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridDepthKit"
+      }
+    },
+    "DepthCamera": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridDepthCamera"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
+}

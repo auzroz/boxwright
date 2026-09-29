@@ -1,0 +1,62 @@
+[
+  {
+    "id": "syn-tools",
+    "name": "Tools 1",
+    "area": "Row A",
+    "access": "easy",
+    "heavySafe": true,
+    "fragileSafe": false,
+    "categories": { "tools": 6 },
+    "capacityL": 100,
+    "fillPct": 50.0,
+    "fillSource": "observed"
+  },
+  {
+    "id": "syn-kitchen",
+    "name": "Kitchen 1",
+    "area": "Row A",
+    "access": "normal",
+    "heavySafe": false,
+    "fragileSafe": true,
+    "categories": { "kitchen": 5 },
+    "capacityL": 100,
+    "fillPct": 25.0,
+    "fillSource": "observed"
+  },
+  {
+    "id": "syn-books",
+    "name": "Books 1",
+    "area": "Row B",
+    "access": "normal",
+    "heavySafe": null,
+    "fragileSafe": null,
+    "categories": { "books-media": 9 },
+    "capacityL": 100,
+    "fillPct": 75.0,
+    "fillSource": "observed"
+  },
+  {
+    "id": "syn-empty",
+    "name": "Empty 1",
+    "area": "Row B",
+    "access": "deep",
+    "heavySafe": null,
+    "fragileSafe": null,
+    "categories": {},
+    "capacityL": 100,
+    "fillPct": 0.0,
+    "fillSource": "observed"
+  },
+  {
+    "id": "syn-misc",
+    "name": "Misc 1",
+    "area": "Row C",
+    "access": "deep",
+    "heavySafe": false,
+    "fragileSafe": false,
+    "categories": { "other": 3 },
+    "capacityL": 100,
+    "fillPct": 87.5,
+    "fillSource": "observed"
+  }
+]
