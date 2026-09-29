@@ -116,10 +116,13 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
       `app.boxwright`, SKU anything) and an **App Store Connect API key**
       (Users and Access > Integrations, App Manager). Keep the `.p8` outside
       the repo.
-- [ ] **`cd app/ios && bundle exec fastlane beta`**: archives, signs with the
-      account signed in to Xcode, takes the next build number from
-      TestFlight, uploads. The marketing version is `MARKETING_VERSION` in
-      the Xcode project (0.1.0).
+- [ ] **`cd app/ios && bundle exec fastlane beta`**: archives, signs through
+      Xcode's automatic signing authenticated by the App Store Connect API
+      key (no Apple ID needed in Xcode), takes the next build number from
+      TestFlight, uploads. The key, the Issuer ID and the team come from the
+      environment or a gitignored `app/ios/fastlane/.env` -- see the
+      Fastfile's header. The marketing version is `MARKETING_VERSION` in the
+      Xcode project (0.1.0).
 - [ ] **Read the email Apple sends after the first upload.** Missing
       privacy-manifest reasons arrive there as ITMS-91053 warnings rather than
       as a failed upload. The app's manifest declares what
