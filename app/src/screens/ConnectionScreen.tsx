@@ -7,7 +7,10 @@ import { sameDestination, transportWarnings, useConnection, validateConnection }
 import type { Connection } from "../connection";
 import { ConnectionChangeBlocked, switchConnection, useQueue } from "../offline";
 import { palette, space, type } from "../theme/tokens";
-import { Button, ToggleRow } from "../ui/controls";
+import { setPrefs, usePrefs } from "../prefs";
+import { Button, Segmented, ToggleRow } from "../ui/controls";
+import { setUnits, useUnits } from "../units";
+import type { UnitSystem } from "../units";
 import { Icon } from "../ui/Icon";
 import { Group, Notice, TextField } from "../ui/surfaces";
 import { Header, Screen } from "../ui/Screen";
@@ -105,10 +108,12 @@ export function ConnectionScreen(props: {
     >
       <Header
         back={props.firstRun ? null : { label: "Cancel", onPress: () => props.onDone(false), disabled: busy !== "" }}
-        title={props.firstRun ? "Connect to your server" : "Server settings"}
+        title={props.firstRun ? "Connect to your server" : "Settings"}
         subtitle="Boxwright runs beside your Homebox, on your own hardware. Enter the address and access token it was set up with (BOXWRIGHT_API_TOKEN)."
       />
 
+      {!props.firstRun && <ThisPhone />}
+      {!props.firstRun && <Text style={type.section}>SERVER</Text>}
       <TextField
         label="Server address"
         value={draft.apiUrl}
@@ -212,6 +217,44 @@ export function ConnectionScreen(props: {
   );
 }
 
+/**
+ * Preferences that belong to this phone rather than the server: they change
+ * how things look and read here, and are never sent anywhere.
+ */
+function ThisPhone() {
+  const p = usePrefs();
+  const system = useUnits();
+  return (
+    <>
+      <Text style={type.section}>THIS PHONE</Text>
+      <Group>
+        <View style={styles.pref}>
+          <Text style={type.body}>Measurements</Text>
+          <Segmented<UnitSystem>
+            options={[
+              { value: "metric", label: "Metric" },
+              { value: "imperial", label: "Imperial" },
+            ]}
+            value={system}
+            onChange={setUnits}
+            accessibilityLabel="Measurements"
+          />
+        </View>
+        <ToggleRow
+          label="Match my Homebox colours"
+          detail={
+            p.homeboxTheme
+              ? `Buttons and highlights use your Homebox theme (${p.homeboxTheme}).`
+              : "Uses your Homebox theme’s colour once the server reports it."
+          }
+          value={p.matchHomebox !== false}
+          onChange={(on) => setPrefs({ matchHomebox: on })}
+        />
+      </Group>
+    </>
+  );
+}
+
 function Check(props: { ok: boolean; neutral?: boolean; text: string }) {
   const colour = props.ok ? palette.ok : props.neutral ? palette.muted : palette.warn;
   return (
@@ -223,6 +266,7 @@ function Check(props: { ok: boolean; neutral?: boolean; text: string }) {
 }
 
 const styles = StyleSheet.create({
+  pref: { padding: space.md, gap: space.sm },
   checks: { gap: space.xs },
   check: { flexDirection: "row", alignItems: "center", gap: space.sm },
   checkText: { fontSize: 15, flex: 1 },

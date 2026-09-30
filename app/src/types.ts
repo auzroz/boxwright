@@ -553,4 +553,10 @@ export interface StatusResponse {
   /** Whether this backend accepts a Homebox URL and token from the app. */
   clientHomebox: boolean;
   homebox: { ok: boolean; error?: string };
+  /**
+   * The Homebox web UI theme of the user these credentials belong to
+   * ("homebox", "forest", ...). Absent when it could not be read, or from a
+   * backend that predates it; the app then keeps its own colours.
+   */
+  homeboxTheme?: string;
 }

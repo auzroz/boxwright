@@ -51,6 +51,7 @@ app/        bare React Native (TypeScript), no Expo — capture, review, file
   src/ui/ src/theme/    Direction A ("Kraft") primitives and tokens; the accent
                         is the only colour that can change (ThemeProvider)
   src/draft.ts          the capture under review, pure, shared by the screens
+  src/prefs.ts          per-phone preferences (units, colours), one MMKV key
   assets/fonts/         Fraunces (SIL OFL) for titles, listed in UIAppFonts
   scripts/              check-ios-config.sh: asserts Info.plist + privacy manifest
 backend/    Go 1.23+, stdlib only (no external modules yet)
@@ -179,6 +180,10 @@ endpoints are REMOVED.
 - `capacityUnits` is neither written nor read. The values in the wild are
   Boxwright's own size-bucket guesses, and read back as a recorded capacity
   they excluded established containers from every recommendation.
+- The web UI theme is `item.theme` in `GET /api/v1/users/self/settings`
+  (per user, free-form; absent means `homebox`). `/status` reports it as
+  `homeboxTheme`, cached 10 min per instance; the app maps the NAME to a colour
+  (src/theme/homebox.ts) because the API carries no colours.
 - Attachments: `POST /api/v1/entities/{id}/attachments` (multipart). `file` and
   `name` are both REQUIRED; `type` is optional and inferred from the mime type.
 - The change feed (`GET /v1/ws/events`, Bearer as everywhere else) is

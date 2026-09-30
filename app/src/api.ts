@@ -218,6 +218,14 @@ export async function probe(connection: Connection, signal?: AbortSignal): Promi
 }
 
 /**
+ * The saved server's status. Unlike probe(), for use once the connection is
+ * saved: it throws like any other request and leaves the wording to the caller.
+ */
+export async function status(signal?: AbortSignal): Promise<StatusResponse> {
+  return asJson<StatusResponse>(await request("/api/v1/status", { method: "GET" }, signal, { timeoutMs: 15_000 }));
+}
+
+/**
  * The content type for a photo, from its file extension.
  *
  * Almost always JPEG, because persistCapturePhoto re-encodes every photo --

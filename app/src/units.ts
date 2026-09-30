@@ -6,14 +6,11 @@
 // nothing anywhere but this phone's screen. The choice is a per-device
 // preference, not inventory data; it defaults from the phone's region.
 
-import { useSyncExternalStore } from "react";
-
-import { readText, writeJson } from "./storage";
+import { prefs, resetPrefsForTest, setPrefs, usePrefs } from "./prefs";
 import type { Dims } from "./types";
 
 export type UnitSystem = "metric" | "imperial";
 
-const PREFS_KEY = "prefs.v1";
 const CM_PER_INCH = 2.54;
 const LITRES_PER_US_GALLON = 3.785411784;
 const MIN_CM = 0.5;
@@ -36,27 +33,17 @@ function systemLocale(): string | undefined {
   }
 }
 
-let current: UnitSystem | undefined;
-const listeners = new Set<() => void>();
-
 /** The chosen system, or the region's default until someone chooses. */
 export function units(): UnitSystem {
-  if (current === undefined) {
-    try {
-      const raw = readText(PREFS_KEY);
-      const saved = raw ? (JSON.parse(raw) as { units?: unknown }).units : undefined;
-      current = saved === "metric" || saved === "imperial" ? saved : defaultUnits();
-    } catch {
-      current = defaultUnits();
-    }
-  }
-  return current;
+  return chosen(prefs().units);
+}
+
+function chosen(saved: unknown): UnitSystem {
+  return saved === "metric" || saved === "imperial" ? saved : defaultUnits();
 }
 
 export function setUnits(next: UnitSystem): void {
-  current = next;
-  writeJson(PREFS_KEY, { version: 1, units: next });
-  for (const l of listeners) l();
+  setPrefs({ units: next });
 }
 
 export function toggleUnits(): void {
@@ -65,19 +52,12 @@ export function toggleUnits(): void {
 
 /** The current system, re-rendering whatever uses it when it changes. */
 export function useUnits(): UnitSystem {
-  return useSyncExternalStore(
-    (l) => {
-      listeners.add(l);
-      return () => listeners.delete(l);
-    },
-    units,
-  );
+  return chosen(usePrefs().units);
 }
 
 /** For tests: forget the cached choice so the next read goes to storage. */
 export function resetUnitsForTest(): void {
-  current = undefined;
-  listeners.clear();
+  resetPrefsForTest();
 }
 
 // ---------------------------------------------------------------------------

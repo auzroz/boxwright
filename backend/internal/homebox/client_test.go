@@ -582,3 +582,48 @@ func TestUpdateFieldsWithNothingToChangeDoesNotWrite(t *testing.T) {
 		t.Errorf("returned %+v, want the entity as read", got)
 	}
 }
+
+// The web UI syncs its theme to the user's settings; the app matches it.
+func TestSelfSettingsReadsTheTheme(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		body string
+		want string
+	}{
+		{"chosen", `{"item":{"theme":"forest","showDetails":true}}`, "forest"},
+		// Never changed: no entry, and the web UI shows its default.
+		{"never chosen", `{"item":{"showDetails":true}}`, DefaultTheme},
+		{"no settings at all", `{"item":{}}`, DefaultTheme},
+		// Written by a browser; a value of the wrong type is not an error.
+		{"not a string", `{"item":{"theme":42}}`, DefaultTheme},
+		{"blank", `{"item":{"theme":"  "}}`, DefaultTheme},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c := serve(t, func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet || r.URL.Path != "/api/v1/users/self/settings" {
+					t.Errorf("request %s %s", r.Method, r.URL.Path)
+				}
+				if got := r.Header.Get("Authorization"); got != "Bearer hb_test-token" {
+					t.Errorf("authorization %q", got)
+				}
+				w.Write([]byte(tc.body))
+			})
+			got, err := c.SelfSettings(context.Background())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.Theme != tc.want {
+				t.Errorf("theme %q, want %q", got.Theme, tc.want)
+			}
+		})
+	}
+}
+
+func TestSelfSettingsReportsARefusal(t *testing.T) {
+	c := serve(t, func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "forbidden", http.StatusForbidden)
+	})
+	if _, err := c.SelfSettings(context.Background()); err == nil {
+		t.Fatal("a 403 must be an error, not the default theme")
+	}
+}

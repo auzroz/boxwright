@@ -112,6 +112,15 @@ type instance struct {
 	writesLive int
 	muteUntil  time.Time
 
+	// themeMu guards the cached web-UI theme reported by /status. It is read
+	// once per settings-screen visit and at launch, and changes only when the
+	// user picks another theme in Homebox, so it is fetched at most every
+	// themeTTL. A failed read is cached as "" for the same time: an API key
+	// that cannot read settings should not cost an upstream call per launch.
+	themeMu sync.Mutex
+	theme   string
+	themeAt time.Time
+
 	// claims serialises concurrent creates carrying the same idempotency key.
 	// Per instance, because two different Homeboxes can hold the same key and
 	// have nothing to do with each other.

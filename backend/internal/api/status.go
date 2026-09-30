@@ -19,6 +19,10 @@ const APIVersion = 1
 // this to list its entity types is worth reporting as a problem anyway.
 const statusProbeTimeout = 10 * time.Second
 
+// themeTTL is how long a Homebox's theme is kept. A change in the web UI
+// reaches the app within this, which is soon enough for a colour.
+const themeTTL = 10 * time.Minute
+
 // About describes this deployment for GET /api/v1/status. Set once from main.
 type About struct {
 	// Version is the build's version, stamped at link time. "dev" otherwise.
@@ -41,6 +45,10 @@ type statusResponse struct {
 	// from the app. When false, the app must not offer to send them.
 	ClientHomebox bool          `json:"clientHomebox"`
 	Homebox       homeboxStatus `json:"homebox"`
+	// HomeboxTheme is the web UI theme of the Homebox user these credentials
+	// belong to ("homebox", "forest", ...), so the app can match its colours.
+	// Empty when it could not be read; the app then keeps its own.
+	HomeboxTheme string `json:"homeboxTheme,omitempty"`
 }
 
 type homeboxStatus struct {
@@ -89,8 +97,28 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		resp.Homebox.Error = err.Error()
 	} else {
 		resp.Homebox.OK = true
+		resp.HomeboxTheme = inst.homeboxTheme(ctx, time.Now())
 	}
 	writeJSON(w, http.StatusOK, resp)
+}
+
+// homeboxTheme returns the cached web-UI theme, reading it again once it is
+// older than themeTTL. A failure is not an error anywhere: the theme is a
+// colour, and /status answers whether things WORK.
+func (inst *instance) homeboxTheme(ctx context.Context, now time.Time) string {
+	inst.themeMu.Lock()
+	defer inst.themeMu.Unlock()
+	if !inst.themeAt.IsZero() && now.Sub(inst.themeAt) < themeTTL {
+		return inst.theme
+	}
+	settings, err := inst.hb.SelfSettings(ctx)
+	if err != nil {
+		inst.theme = ""
+	} else {
+		inst.theme = settings.Theme
+	}
+	inst.themeAt = now
+	return inst.theme
 }
 
 var errNoHomebox = errors.New("this server has no Homebox of its own; set a Homebox URL and token in the app")
