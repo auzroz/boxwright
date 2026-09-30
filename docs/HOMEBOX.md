@@ -203,10 +203,10 @@ entry at all, and the web UI then shows `homebox`, so that is what Boxwright
 reports for an absent value. Both routes sit behind the same user middleware
 as every other `/v1` route (`backend/app/api/routes.go`).
 
-Whether an API key (not only a session) can read it is measured by the e2e
-job: the session `PUT`s `{"theme":"forest"}` and `/status`, holding only the
-API key, must report `homeboxTheme: "forest"`. A read that fails is cached as
-"unknown" and never marks Homebox down.
+**An API key can read it** (measured 2026-09-30 by the e2e job against
+v0.26.2): the session `PUT`s `{"theme":"forest"}` and `/status`, holding only
+the API key, reports `homeboxTheme: "forest"`. The e2e keeps asserting it. A
+read that fails anyway is cached as "unknown" and never marks Homebox down.
 
 The colours are not in the API. The app maps the name to that theme's
 `--primary` in `frontend/assets/css/main.css` (src/theme/homebox.ts), and
