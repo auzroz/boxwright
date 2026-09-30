@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DepthKit } from "boxwright-depth";
 
 import { TextField } from "../ui/surfaces";
 import { dimsFieldText, parseDimsIn, useUnits } from "../units";
@@ -75,7 +76,13 @@ export function SizeField(props: {
       returnKeyType="done"
       right={<UnitSwitch system={system} kind="length" />}
       accessibilityLabel={`Size in ${system === "metric" ? "centimetres" : "inches"}, three numbers`}
-      hint={props.source === "vision" ? "Correct it if you know; a measured size can rule out containers it will not fit." : undefined}
+      hint={
+        props.source !== "vision"
+          ? undefined
+          : DepthKit.isSupported
+            ? "Correct it if you know; a measured size can rule out containers it will not fit."
+            : "Estimated from what it is. This iPhone can’t measure with the camera, so type the size if you know it: a typed size lets Boxwright rule out containers it won’t fit."
+      }
       error={bad ? `Three numbers, like ${example}. Add cm or in to use the other unit.` : undefined}
     />
   );

@@ -4,6 +4,7 @@
 //
 
 import ARKit
+import AVFoundation
 import Foundation
 import NitroModules
 
@@ -17,6 +18,16 @@ class HybridDepthKit: HybridDepthKitSpec {
   var isSupported: Bool {
     ARWorldTrackingConfiguration.isSupported
       && ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth)
+  }
+
+  var cameraAccess: CameraAccess {
+    switch AVCaptureDevice.authorizationStatus(for: .video) {
+    case .authorized: return .granted
+    case .denied: return .denied
+    case .restricted: return .restricted
+    case .notDetermined: return .undetermined
+    @unknown default: return .undetermined
+    }
   }
 
   func readFile(path: String) throws -> Promise<ArrayBuffer> {

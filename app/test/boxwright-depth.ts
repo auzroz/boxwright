@@ -21,24 +21,32 @@ export type {
   DepthCameraMode,
   DepthCameraProps,
   DepthCapture,
+  DepthSessionEvent,
+  DepthSessionState,
   DepthStatus,
   DepthTracking,
 } from "../modules/boxwright-depth/src/specs/DepthCamera.nitro";
+export type { CameraAccess } from "../modules/boxwright-depth/src/specs/DepthKit.nitro";
 export type { DepthCamera as DepthCameraRef } from "../modules/boxwright-depth/src/specs/DepthCamera.nitro";
 
 let supported = false;
+let access: DepthKitSpec["cameraAccess"] = "undetermined";
 /** path -> file contents, for readFile. */
 export const depthFiles = new Map<string, Uint8Array>();
 
 /** Back to an unsupported phone with no files. */
-export function resetDepth(opts: { supported?: boolean } = {}): void {
+export function resetDepth(opts: { supported?: boolean; cameraAccess?: DepthKitSpec["cameraAccess"] } = {}): void {
   supported = opts.supported ?? false;
+  access = opts.cameraAccess ?? "undetermined";
   depthFiles.clear();
 }
 
-export const DepthKit: Pick<DepthKitSpec, "isSupported" | "readFile"> = {
+export const DepthKit: Pick<DepthKitSpec, "isSupported" | "cameraAccess" | "readFile"> = {
   get isSupported(): boolean {
     return supported;
+  },
+  get cameraAccess(): DepthKitSpec["cameraAccess"] {
+    return access;
   },
   async readFile(path: string): Promise<ArrayBuffer> {
     const bytes = depthFiles.get(path);

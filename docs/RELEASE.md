@@ -154,6 +154,11 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
   | Paste a copied image (long-press an image in Safari, Copy) | iOS "Allow Paste" prompt only on tap; the image is filed like a photo |
   | Take a shelf of several items, park it, open it from the list later | Identified in the background; per-item thumbnails line up with their items |
   | Take photo on a LiDAR iPhone | Boxwright's own camera opens, with "Use the system camera" one tap away; a phone without LiDAR gets the system camera |
+  | LiDAR iPhone, camera access turned off in Settings | Take photo goes to the system camera path: "Camera access needed" with Open Settings; never a black preview |
+  | Boxwright's camera open, then pull down Control Centre / take a call | "Something else is using the camera"; shutter disabled; comes back by itself afterwards |
+  | Boxwright's camera in a dark cupboard for 10 s | Suggests more light; the photo can still be taken (without depth) |
+  | Measure fill, then "Choose how full instead" | Back to the Empty/¼/½/¾/Full choices |
+  | Review on a phone without LiDAR | Size says it is estimated from what it is, and that a typed size can rule containers out |
   | A boxed item (e.g. a shoebox) at ~0.8 m, 45 degrees | Review card says "measured with LiDAR"; within ~1.5 cm of a tape measure on each side |
   | A shelf of several items, each located by the model | Each measured separately; an item the model did not locate keeps its estimate |
   | Record container sizes: tick several, "New type...", "27 gal", inside size | Type, 102 L and the inside size show on every ticked container, and in Homebox |

@@ -122,6 +122,12 @@ using namespace margelo::nitro::boxwrightdepth::views;
           : !newViewProps.onStatus.hasSameValue(oldViewProps->onStatus)) {
       swiftPart.setOnStatus(newViewProps.onStatus.get());
     }
+    // onSessionEvent: optional
+    if (oldViewProps == nullptr
+          ? newViewProps.onSessionEvent.isProvided()
+          : !newViewProps.onSessionEvent.hasSameValue(oldViewProps->onSessionEvent)) {
+      swiftPart.setOnSessionEvent(newViewProps.onSessionEvent.get());
+    }
 
     // Update hybridRef if it changed
     if (oldViewProps == nullptr

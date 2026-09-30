@@ -18,6 +18,10 @@ namespace margelo::nitro::boxwrightdepth { enum class DepthCameraMode; }
 namespace margelo::nitro::boxwrightdepth { struct DepthStatus; }
 // Forward declaration of `DepthTracking` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { enum class DepthTracking; }
+// Forward declaration of `DepthSessionEvent` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { struct DepthSessionEvent; }
+// Forward declaration of `DepthSessionState` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class DepthSessionState; }
 // Forward declaration of `DepthCapture` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
 
@@ -26,9 +30,11 @@ namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
 #include <functional>
 #include <optional>
 #include "DepthTracking.hpp"
+#include "DepthSessionEvent.hpp"
+#include "DepthSessionState.hpp"
+#include <string>
 #include "DepthCapture.hpp"
 #include <NitroModules/Promise.hpp>
-#include <string>
 
 #include "BoxwrightDepth-Swift-Cxx-Umbrella.hpp"
 
@@ -101,6 +107,13 @@ namespace margelo::nitro::boxwrightdepth {
     }
     inline void setOnStatus(const std::optional<std::function<void(const DepthStatus& /* status */)>>& onStatus) noexcept override {
       _swiftPart.setOnStatus(onStatus);
+    }
+    inline std::optional<std::function<void(const DepthSessionEvent& /* event */)>> getOnSessionEvent() noexcept override {
+      auto __result = _swiftPart.getOnSessionEvent();
+      return __result;
+    }
+    inline void setOnSessionEvent(const std::optional<std::function<void(const DepthSessionEvent& /* event */)>>& onSessionEvent) noexcept override {
+      _swiftPart.setOnSessionEvent(onSessionEvent);
     }
 
   public:

@@ -24,6 +24,23 @@ export interface DepthStatus {
   depthOK: boolean
 }
 
+/**
+ * `failed`: the session stopped and will not restart by itself -- camera
+ * access refused, the camera unavailable, an unsupported configuration.
+ * `interrupted`: something else took the camera (a call, Control Centre, the
+ * app going to the background), and `resumed` when it is back.
+ */
+export type DepthSessionState = 'failed' | 'interrupted' | 'resumed'
+
+/** Sent when the session fails or is interrupted: the cases no frame reports. */
+export interface DepthSessionEvent {
+  state: DepthSessionState
+  /** ARKit's own description, for a failure. */
+  message?: string
+  /** The failure was camera access being refused, so Settings is the fix. */
+  cameraDenied: boolean
+}
+
 /** What one capture wrote, both in the temporary directory. */
 export interface DepthCapture {
   /** An upright JPEG with no EXIF or GPS metadata. */
@@ -38,6 +55,7 @@ export interface DepthCameraProps extends HybridViewProps {
   active: boolean
   torch: boolean
   onStatus?: (status: DepthStatus) => void
+  onSessionEvent?: (event: DepthSessionEvent) => void
 }
 
 export interface DepthCameraMethods extends HybridViewMethods {

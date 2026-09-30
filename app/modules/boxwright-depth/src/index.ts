@@ -10,16 +10,19 @@ import type {
   DepthCameraMethods,
   DepthCameraProps,
 } from './specs/DepthCamera.nitro'
-import type { DepthKit as DepthKitSpec } from './specs/DepthKit.nitro'
+import type { CameraAccess, DepthKit as DepthKitSpec } from './specs/DepthKit.nitro'
 
 export type {
   DepthCameraMethods,
   DepthCameraMode,
   DepthCameraProps,
   DepthCapture,
+  DepthSessionEvent,
+  DepthSessionState,
   DepthStatus,
   DepthTracking,
 } from './specs/DepthCamera.nitro'
+export type { CameraAccess } from './specs/DepthKit.nitro'
 
 /** What `hybridRef` hands back: call `capture()` on it. */
 export type DepthCameraRef = DepthCameraSpec
@@ -46,6 +49,13 @@ export const DepthKit = {
   /** False on any phone without LiDAR, and wherever the native side is missing. */
   get isSupported(): boolean {
     return nativeKit()?.isSupported ?? false
+  },
+  /**
+   * Whether the camera may be used, before asking. "undetermined" where the
+   * native side is missing: the system camera then asks, as it always has.
+   */
+  get cameraAccess(): CameraAccess {
+    return nativeKit()?.cameraAccess ?? 'undetermined'
   },
   /** A whole file, e.g. a `.depth`, as bytes. */
   readFile(path: string): Promise<ArrayBuffer> {

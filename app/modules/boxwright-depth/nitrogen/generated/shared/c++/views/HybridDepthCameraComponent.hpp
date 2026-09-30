@@ -21,6 +21,7 @@
 #include "DepthStatus.hpp"
 #include <functional>
 #include <optional>
+#include "DepthSessionEvent.hpp"
 #include <memory>
 #include "HybridDepthCameraSpec.hpp"
 
@@ -48,6 +49,7 @@ namespace margelo::nitro::boxwrightdepth::views {
     nitro::ReactProp<bool> active;
     nitro::ReactProp<bool> torch;
     nitro::ReactProp<std::optional<std::function<void(const DepthStatus& /* status */)>>> onStatus;
+    nitro::ReactProp<std::optional<std::function<void(const DepthSessionEvent& /* event */)>>> onSessionEvent;
     nitro::ReactProp<std::optional<std::function<void(const std::shared_ptr<HybridDepthCameraSpec>& /* ref */)>>> hybridRef;
 
     [[nodiscard]]
@@ -56,6 +58,7 @@ namespace margelo::nitro::boxwrightdepth::views {
              active.hasSameValue(other.active) &&
              torch.hasSameValue(other.torch) &&
              onStatus.hasSameValue(other.onStatus) &&
+             onSessionEvent.hasSameValue(other.onSessionEvent) &&
              hybridRef.hasSameValue(other.hybridRef);
     }
 
@@ -65,6 +68,7 @@ namespace margelo::nitro::boxwrightdepth::views {
              active.isProvided() ||
              torch.isProvided() ||
              onStatus.isProvided() ||
+             onSessionEvent.isProvided() ||
              hybridRef.isProvided();
     }
 
