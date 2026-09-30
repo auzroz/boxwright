@@ -131,6 +131,8 @@ same way an archive does.
 | `AI_BASE_URL` | e.g. `https://api.openai.com/v1` or `http://ollama:11434` | — (Anthropic: `https://api.anthropic.com`) |
 | `AI_API_KEY` | key for OpenAI-compatible and Anthropic providers | — |
 | `AI_MODEL` | e.g. `gpt-5-mini`, `gemma3:4b`, `qwen3-vl:8b` | — (Anthropic: `claude-opus-5`) |
+| `AI_EFFORT` | Anthropic: `low`, `medium`, `high`, `xhigh` or `max` | — (the model's own) |
+| `AI_THINKING` | Anthropic: `auto` (least the model allows) or `adaptive` | `auto` |
 | `CLAUDE_CLI_PATH` | `claude-code` only: path to the CLI | `claude` (from `PATH`) |
 | `CLAUDE_CODE_PERMISSION_MODE` | `claude-code` only: escape hatch, see below | `default` |
 | `BOX_CACHE_TTL` | box index refresh interval. A cold rebuild is 1 list call plus 2 per chosen location — ~21s for 80 of them against a LAN Homebox, so do not set this low | `5m` |

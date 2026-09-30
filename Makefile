@@ -1,4 +1,4 @@
-.PHONY: test vet fmt fmtcheck build run docker app-install app-typecheck app-test bootstrap bootstrap-apply
+.PHONY: identeval test vet fmt fmtcheck build run docker app-install app-typecheck app-test bootstrap bootstrap-apply
 
 # -tags e2e so the end-to-end harness is vetted too; it is not run here.
 vet:
@@ -38,6 +38,14 @@ docker:
 E2E_HOMEBOX_URL ?= http://127.0.0.1:7745
 e2e:
 	cd backend && E2E_HOMEBOX_URL=$(E2E_HOMEBOX_URL) go test -tags e2e -count=1 -v ./e2e
+
+# Identification eval: every model/effort/thinking config in
+# backend/cmd/identeval/testdata/matrix.json against 20 labelled photos, 3 runs
+# each. Needs AI_API_KEY and costs real money (about $20 for the full matrix at
+# 2026-09 prices; -max-usd caps it). Built, not `go run`, for the same memory
+# reason as `make run`. Pass flags with ARGS, e.g. ARGS='-configs "Sonnet 5.5" -runs 1'.
+identeval:
+	cd backend && go build -o bin/identeval ./cmd/identeval && ./bin/identeval $(ARGS)
 
 app-install:
 	cd app && npm ci

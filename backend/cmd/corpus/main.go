@@ -81,7 +81,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	ident, err := ai.New(cfg.AIProvider, cfg.AIBaseURL, cfg.AIAPIKey, cfg.AIModel)
+	ident, err := ai.New(cfg.AIProvider, cfg.AIBaseURL, cfg.AIAPIKey, cfg.AIModel,
+		ai.WithEffort(cfg.AIEffort), ai.WithThinking(cfg.AIThinking))
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,15 @@
+{
+  "about": "The configurations cmd/identeval compares. When a model is released, add a line (and its price to anthropicPricing, and its family to anthropicFamilies if it is new), then run `make identeval`. `thinking` is auto (the least the model allows) or adaptive; `effort` empty keeps the model's default.",
+  "configs": [
+    { "label": "Opus 5 (current default)", "model": "claude-opus-5" },
+    { "label": "Opus 5.5 low", "model": "claude-opus-5-5", "effort": "low" },
+    { "label": "Opus 5.5 medium (its default)", "model": "claude-opus-5-5", "effort": "medium" },
+    { "label": "Sonnet 5.5 low", "model": "claude-sonnet-5-5", "effort": "low" },
+    { "label": "Sonnet 5.5 medium", "model": "claude-sonnet-5-5", "effort": "medium" },
+    { "label": "Sonnet 5.5 low, adaptive thinking", "model": "claude-sonnet-5-5", "effort": "low", "thinking": "adaptive" },
+    { "label": "Sonnet 5.5 high, adaptive thinking (its default)", "model": "claude-sonnet-5-5", "effort": "high", "thinking": "adaptive" },
+    { "label": "Sonnet 5", "model": "claude-sonnet-5" },
+    { "label": "Haiku 4.5", "model": "claude-haiku-4-5" },
+    { "label": "Fable 5.1 low", "model": "claude-fable-5-1", "effort": "low" }
+  ]
+}

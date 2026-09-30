@@ -46,8 +46,16 @@ type Identifier interface {
 	Identify(ctx context.Context, image []byte, mimeType string, categories []placement.Category) ([]placement.ItemDraft, error)
 }
 
-// New builds an Identifier from configuration.
-func New(provider, baseURL, apiKey, model string) (Identifier, error) {
+// New builds an Identifier from configuration. Options tune how the model is
+// asked (effort, thinking); providers that have no such knobs ignore them.
+func New(provider, baseURL, apiKey, model string, opts ...Option) (Identifier, error) {
+	var t tuning
+	for _, o := range opts {
+		o(&t)
+	}
+	if err := ValidateTuning(t.effort, t.thinking); err != nil {
+		return nil, err
+	}
 	switch provider {
 	case "openai":
 		return &openAICompat{baseURL: strings.TrimRight(baseURL, "/"), apiKey: apiKey, model: model}, nil
@@ -59,7 +67,7 @@ func New(provider, baseURL, apiKey, model string) (Identifier, error) {
 		if model == "" {
 			model = anthropicDefaultModel
 		}
-		return &anthropicProvider{baseURL: anthropicBaseURL(baseURL), apiKey: apiKey, model: model}, nil
+		return &anthropicProvider{baseURL: anthropicBaseURL(baseURL), apiKey: apiKey, model: model, tuning: t}, nil
 	case "claude-code":
 		// Development-only; see the header comment in claude_code.go. baseURL
 		// and apiKey are ignored on purpose: the CLI holds its own credentials
