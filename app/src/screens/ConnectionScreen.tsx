@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { errorMessage, probe } from "../api";
 import type { ProbeResult } from "../api";
 import { sameDestination, transportWarnings, useConnection, validateConnection } from "../connection";
 import type { Connection } from "../connection";
 import { ConnectionChangeBlocked, switchConnection, useQueue } from "../offline";
-import { palette, space, type } from "../theme/tokens";
+import { useTheme } from "../theme/ThemeProvider";
+import { MIN_TARGET, palette, radius, space, type } from "../theme/tokens";
 import { setPrefs, usePrefs } from "../prefs";
 import { Button, Segmented, ToggleRow } from "../ui/controls";
 import { setUnits, useUnits } from "../units";
@@ -34,9 +35,33 @@ export function ConnectionScreen(props: {
    * one reads from the server.
    */
   setup?: { onBack: () => void; step: { index: number; count: number } };
+  /** In the demo there is no server to set: only this phone's preferences, and the way out. */
+  demo?: { onLeave: () => void; onBack: () => void };
+  /** Offered at the foot of Settings. */
+  onTryDemo?: () => void;
   /** `moved` is true when the save pointed the app at a different inventory. */
   onDone: (moved: boolean) => void;
 }) {
+  if (props.demo) return <DemoSettings onLeave={props.demo.onLeave} onBack={props.demo.onBack} />;
+  return <ServerSettings {...props} />;
+}
+
+function DemoSettings(props: { onLeave: () => void; onBack: () => void }) {
+  return (
+    <Screen>
+      <Header back={{ label: "Back", onPress: props.onBack }} title="Settings" />
+      <ThisPhone />
+      <Notice
+        title="You’re in the demo"
+        action={<Button label="Leave the demo" kind="secondary" compact onPress={props.onLeave} />}
+      >
+        Its inventory is a sample on this phone. Leave it to connect your own server; nothing from the demo comes with you.
+      </Notice>
+    </Screen>
+  );
+}
+
+function ServerSettings(props: Parameters<typeof ConnectionScreen>[0]) {
   const { connection } = useConnection();
   const queue = useQueue();
   const [draft, setDraft] = useState<Connection>(connection);
@@ -44,6 +69,9 @@ export function ConnectionScreen(props: {
   const [errors, setErrors] = useState<Partial<Record<keyof Connection, string>>>({});
   const [result, setResult] = useState<ProbeResult | null>(null);
   const [busy, setBusy] = useState<"" | "test" | "save">("");
+  function leave(moved: boolean): void {
+    props.onDone(moved);
+  }
 
   /** The draft as it would be saved: the Homebox pair only while that section is open. */
   function effective(): Connection {
@@ -88,7 +116,7 @@ export function ConnectionScreen(props: {
     try {
       const moved = !sameDestination(connection, next);
       await switchConnection(next);
-      props.onDone(moved);
+      leave(moved);
     } catch (err) {
       if (err instanceof ConnectionChangeBlocked) {
         Alert.alert("Captures are still waiting", err.message);
@@ -127,7 +155,7 @@ export function ConnectionScreen(props: {
             ? { label: "Welcome", onPress: props.setup.onBack, disabled: busy !== "" }
             : props.firstRun
               ? null
-              : { label: "Cancel", onPress: () => props.onDone(false), disabled: busy !== "" }
+              : { label: "Cancel", onPress: () => leave(false), disabled: busy !== "" }
         }
         step={props.setup?.step}
         title={props.setup ? "Connect your server" : props.firstRun ? "Connect to your server" : "Settings"}
@@ -150,17 +178,11 @@ export function ConnectionScreen(props: {
         literal
         onChange={(apiUrl) => edit({ apiUrl })}
       />
-      <TextField
+      <SecretField
         label="Access token"
         value={draft.apiToken}
         placeholder="Leave empty only for a server on this device"
         error={errors.apiToken}
-        secret
-        literal
-        // iOS offers to save any secure field as a website password -- a
-        // "Save Password?" sheet over the next screen -- unless it is marked
-        // as a one-time code. "none" is not enough; it still asked.
-        textContentType="oneTimeCode"
         onChange={(apiToken) => edit({ apiToken })}
       />
       {queue.entries.length > 0 && (
@@ -196,14 +218,11 @@ export function ConnectionScreen(props: {
             literal
             onChange={(homeboxUrl) => edit({ homeboxUrl })}
           />
-          <TextField
+          <SecretField
             label="Homebox API key"
             value={draft.homeboxToken}
             placeholder="hb_…"
             error={errors.homeboxToken}
-            secret
-            literal
-            textContentType="oneTimeCode"
             onChange={(homeboxToken) => edit({ homeboxToken })}
           />
         </>
@@ -241,7 +260,57 @@ export function ConnectionScreen(props: {
           </View>
         </Notice>
       )}
+      {props.onTryDemo && !props.setup && (
+        <Button label="Try the demo" kind="quiet" onPress={props.onTryDemo} />
+      )}
     </Screen>
+  );
+}
+
+/**
+ * A token: dots unless it is being edited, and never a secure text field.
+ *
+ * iOS offers to "Save Password?" for any secure field that leaves the screen
+ * with text in it, as a sheet over whatever comes next. textContentType "none"
+ * and "oneTimeCode" did not stop it, and nor did unmasking the field just
+ * before leaving (all tried on the iOS 27 simulator). Without a secure field
+ * there is nothing to offer, so the token is shown as dots by this screen
+ * rather than by the keyboard, and in plain text only while it is typed.
+ */
+function SecretField(props: { label: string; value: string; placeholder: string; error?: string; onChange: (v: string) => void }) {
+  const { accent } = useTheme();
+  const [editing, setEditing] = useState(false);
+  if (editing || props.value === "") {
+    return (
+      <TextField
+        label={props.label}
+        value={props.value}
+        placeholder={props.placeholder}
+        error={props.error}
+        literal
+        textContentType="none"
+        autoFocus={editing}
+        onEndEditing={() => setEditing(false)}
+        onChange={props.onChange}
+      />
+    );
+  }
+  return (
+    <View style={styles.secret}>
+      <Text style={type.label}>{props.label}</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${props.label}, set. Change`}
+        onPress={() => setEditing(true)}
+        style={[styles.secretBox, props.error !== undefined && styles.secretError]}
+      >
+        <Text style={styles.dots} numberOfLines={1}>
+          {"•".repeat(Math.min(props.value.length, 24))}
+        </Text>
+        <Text style={[styles.change, { color: accent }]}>Change</Text>
+      </Pressable>
+      {props.error !== undefined ? <Text style={[type.caption, styles.errorText]}>{props.error}</Text> : null}
+    </View>
   );
 }
 
@@ -294,6 +363,22 @@ function Check(props: { ok: boolean; neutral?: boolean; text: string }) {
 }
 
 const styles = StyleSheet.create({
+  secret: { gap: 6 },
+  secretBox: {
+    minHeight: MIN_TARGET,
+    borderWidth: 1,
+    borderColor: palette.line,
+    borderRadius: radius.md,
+    paddingHorizontal: space.md,
+    backgroundColor: palette.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+  },
+  secretError: { borderColor: palette.warn },
+  dots: { flex: 1, fontSize: 17, letterSpacing: 2, color: palette.ink },
+  change: { fontSize: 15, fontWeight: "600" },
+  errorText: { color: palette.warn },
   pref: { padding: space.md, gap: space.sm },
   checks: { gap: space.xs },
   check: { flexDirection: "row", alignItems: "center", gap: space.sm },

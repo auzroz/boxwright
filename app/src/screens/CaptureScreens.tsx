@@ -108,6 +108,7 @@ export function InboxScreen(props: {
 }
 
 export function ReviewScreen(props: {
+  demo?: boolean;
   back: Back;
   busy: boolean;
   photo: PersistedPhoto | null;
@@ -156,6 +157,9 @@ export function ReviewScreen(props: {
         }
       />
       {props.photo && <Image source={{ uri: props.photo.uri }} style={single ? styles.photo : styles.photoSmall} />}
+      {props.demo && (
+        <Notice tone="caution">These are the demo’s example items, not what’s in your photo. Change anything, then find them a place.</Notice>
+      )}
       {props.photo && !props.photo.downscaled && (
         <Text style={type.caption}>Could not resize this photo. It will upload at full size.</Text>
       )}
@@ -251,6 +255,7 @@ export function RecommendScreen(props: {
 }
 
 export function DoneScreen(props: {
+  demo?: boolean;
   captureId: string;
   filed: QueuedEntry[];
   failures: Failure[];
@@ -274,7 +279,11 @@ export function DoneScreen(props: {
         <Text style={type.display} accessibilityRole="header">
           {doneTitle(filed, failures, queued)}
         </Text>
-        <Text style={type.callout}>{doneSubtitle(filed, failures, queued)}</Text>
+        <Text style={type.callout}>
+          {props.demo && failures.length === 0 && queued.length === 0
+            ? "Into the demo’s sample inventory, which is gone when you leave."
+            : doneSubtitle(filed, failures, queued)}
+        </Text>
       </View>
 
       {rows.length > 0 && (

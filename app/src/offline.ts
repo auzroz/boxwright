@@ -31,6 +31,7 @@ import { currentConnection, isConfigured, sameDestination, saveConnection } from
 import type { Connection } from "./connection";
 import { capturePhotoUri, deleteCapturePhoto, gcCapturePhotos } from "./photo";
 import { quarantine, readText, remove, writeJson } from "./storage";
+import { demoActive } from "./demo/mode";
 import type {
   Box,
   CatalogEntry,
@@ -112,6 +113,17 @@ function adoptCapture(raw: unknown): QueuedCapture {
  * pictures nobody can ever get back. Orphaned photos are cheap; a capture is
  * not.
  */
+/**
+ * Reads everything again from whichever store is now current, for moving in
+ * or out of the demo. Answers still in flight from the other world are thrown
+ * away (the same epoch that guards a server switch), and nothing is flushed
+ * or identified while the two are changing places.
+ */
+export function reloadForSwitch(): void {
+  destinationEpoch += 1;
+  loadAll();
+}
+
 export function loadAll(): void {
   const pendingOK = loadPending();
   const queueOK = loadQueue();
@@ -836,7 +848,7 @@ async function identifyLoop(): Promise<void> {
   // parked photo an attempt, and three of those set it aside as failed. It
   // waits, uncharged, and connectionSaved runs this again once there is a
   // server to send it to.
-  if (!isConfigured(currentConnection())) return;
+  if (!isConfigured(currentConnection()) && !demoActive()) return;
   for (;;) {
     const next = pending.captures.find((c) => c.status === "identifying");
     if (!next) return;

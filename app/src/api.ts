@@ -1,4 +1,6 @@
 import { currentConnection, isConfigured } from "./connection";
+import { DEMO_IDENTIFY_MS } from "./demo/backend";
+import { demoActive, demoInventory } from "./demo/mode";
 import type { Connection } from "./connection";
 
 import type {
@@ -172,6 +174,29 @@ export type ProbeResult =
   | { ok: false; message: string };
 
 /**
+ * The demo's answer, after a moment: instant answers make the screens flash
+ * past faster than anyone could follow, and the demo is for looking at them.
+ * Honours an abort the way a real request would.
+ */
+function demoAnswer<T>(answer: () => T, signal?: AbortSignal, ms = 300): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      try {
+        resolve(answer());
+      } catch (err) {
+        reject(err);
+      }
+    }, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      const aborted = new Error("Aborted");
+      aborted.name = "AbortError";
+      reject(aborted);
+    });
+  });
+}
+
+/**
  * Checks a connection end to end WITHOUT saving it.
  *
  * One authenticated call, which answers three questions: is the backend there,
@@ -222,6 +247,7 @@ export async function probe(connection: Connection, signal?: AbortSignal): Promi
  * saved: it throws like any other request and leaves the wording to the caller.
  */
 export async function status(signal?: AbortSignal): Promise<StatusResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().status(), signal);
   return asJson<StatusResponse>(await request("/api/v1/status", { method: "GET" }, signal, { timeoutMs: 15_000 }));
 }
 
@@ -275,6 +301,7 @@ function filePart(uri: string): Blob {
  * mean re-encoding a queued photo a second time on every flush attempt.
  */
 export async function identify(uri: string, signal?: AbortSignal): Promise<ItemDraft[]> {
+  if (demoActive()) return demoAnswer(() => demoInventory().identify(), signal, DEMO_IDENTIFY_MS);
   const form = new FormData();
   form.append("image", filePart(uri));
   // No Content-Type header: RN must set its own multipart boundary.
@@ -298,6 +325,7 @@ export async function identify(uri: string, signal?: AbortSignal): Promise<ItemD
  * recommendations[i] belongs to items[i].
  */
 export async function recommend(items: ItemDraft[], signal?: AbortSignal): Promise<RecommendResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().recommend(items), signal);
   const payload: RecommendRequest = { items };
   const res = await asJson<RecommendResponse>(
     await request(
@@ -311,6 +339,7 @@ export async function recommend(items: ItemDraft[], signal?: AbortSignal): Promi
 
 /** The boxes the engine can choose between. */
 export async function boxes(signal?: AbortSignal): Promise<BoxesResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().boxes(), signal);
   return asJson<BoxesResponse>(await request("/api/v1/boxes", { method: "GET" }, signal));
 }
 
@@ -320,6 +349,7 @@ export async function boxes(signal?: AbortSignal): Promise<BoxesResponse> {
  * vision model, so the app must never substitute a list of its own for it.
  */
 export async function categories(signal?: AbortSignal): Promise<CategoriesResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().categories(), signal);
   return asJson<CategoriesResponse>(await request("/api/v1/categories", { method: "GET" }, signal));
 }
 
@@ -331,6 +361,7 @@ export async function categories(signal?: AbortSignal): Promise<CategoriesRespon
  * never showed them.
  */
 export async function locations(signal?: AbortSignal): Promise<LocationsResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().locations(), signal);
   const res = await asJson<LocationsResponse>(await request("/api/v1/locations", { method: "GET" }, signal));
   return {
     locations: Array.isArray(res.locations) ? res.locations : [],
@@ -353,6 +384,7 @@ export async function setLocations(
   choices: LocationChoice[],
   signal?: AbortSignal,
 ): Promise<LocationsWriteResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().setLocations(choices), signal);
   const res = await asJson<LocationsWriteResponse>(
     await request(
       "/api/v1/locations",
@@ -374,6 +406,7 @@ export async function setContainers(
   body: PutContainersRequest,
   signal?: AbortSignal,
 ): Promise<PutContainersResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().setContainers(body), signal);
   const res = await asJson<PutContainersResponse>(
     await request(
       "/api/v1/containers",
@@ -392,6 +425,7 @@ export async function setContainers(
  * decision already recorded, in either direction, and it is safe to run twice.
  */
 export async function adoptLocations(signal?: AbortSignal): Promise<AdoptResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().adoptLocations(), signal);
   const res = await asJson<AdoptResponse>(
     await request("/api/v1/locations/adopt", { method: "POST" }, signal),
   );
@@ -400,6 +434,7 @@ export async function adoptLocations(signal?: AbortSignal): Promise<AdoptRespons
 
 /** Homebox entity types; a new container needs the id of one where isLocation is true. */
 export async function entityTypes(signal?: AbortSignal): Promise<EntityTypesResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().entityTypes(), signal);
   return asJson<EntityTypesResponse>(await request("/api/v1/entity-types", { method: "GET" }, signal));
 }
 
@@ -421,6 +456,7 @@ export async function catalog(
   photoUri?: string,
   signal?: AbortSignal,
 ): Promise<CatalogResponse> {
+  if (demoActive()) return demoAnswer(() => demoInventory().catalog({ entries: args.entries, captureId: args.captureId, capturedAt: args.capturedAt }), signal);
   const payload: CatalogRequest = { entries: args.entries, captureId: args.captureId, capturedAt: args.capturedAt };
   const form = new FormData();
   form.append("payload", JSON.stringify(payload));

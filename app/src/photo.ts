@@ -16,6 +16,20 @@ const JPEG_QUALITY = 0.6;
 
 /** Where durable capture photos live, relative to the document directory. */
 const CAPTURES_DIR = "captures";
+/** The demo's photos: a directory of their own, deleted when the demo ends. */
+const DEMO_CAPTURES_DIR = "demo-captures";
+let capturesDir = CAPTURES_DIR;
+
+/** Points capture files at the demo's directory, or back at the real one. */
+export function useDemoCaptures(on: boolean): void {
+  capturesDir = on ? DEMO_CAPTURES_DIR : CAPTURES_DIR;
+}
+
+/** Deletes every photo the demo took. */
+export async function deleteDemoCaptures(): Promise<void> {
+  const dir = `${Dirs.DocumentDir}/${DEMO_CAPTURES_DIR}`;
+  if (await FileSystem.exists(dir)) await FileSystem.unlink(dir);
+}
 
 /** An image's size in pixels, for a file: or a data: uri alike. */
 function measure(uri: string): Promise<{ width: number; height: number }> {
@@ -85,7 +99,7 @@ function toUri(path: string): string {
  * is still perfectly present. `Dirs.DocumentDir` is always current.
  */
 function capturesPath(name?: string): string {
-  const dir = `${Dirs.DocumentDir}/${CAPTURES_DIR}`;
+  const dir = `${Dirs.DocumentDir}/${capturesDir}`;
   return name === undefined ? dir : `${dir}/${name}`;
 }
 

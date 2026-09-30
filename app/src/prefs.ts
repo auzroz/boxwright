@@ -8,7 +8,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import { readText, writeJson } from "./storage";
+import { readDeviceText, writeDeviceJson } from "./storage";
 
 export const PREFS_KEY = "prefs.v1";
 
@@ -21,6 +21,8 @@ export interface Prefs {
   /** First-run setup: where it got to, and whether it is over. See setup.ts. */
   setupStep?: string;
   setupDone?: boolean;
+  /** "demo" while the demo is on, so a relaunch goes back into it. */
+  mode?: "demo";
 }
 
 let cached: Prefs | undefined;
@@ -29,7 +31,7 @@ const listeners = new Set<() => void>();
 export function prefs(): Prefs {
   if (cached === undefined) {
     try {
-      const raw = readText(PREFS_KEY);
+      const raw = readDeviceText(PREFS_KEY);
       const parsed: unknown = raw ? JSON.parse(raw) : {};
       cached = parsed && typeof parsed === "object" ? (parsed as Prefs) : {};
     } catch {
@@ -43,7 +45,7 @@ export function prefs(): Prefs {
 export function setPrefs(patch: Partial<Prefs>): void {
   const next = { ...prefs(), ...patch };
   cached = next;
-  writeJson(PREFS_KEY, { version: 1, ...next });
+  writeDeviceJson(PREFS_KEY, { version: 1, ...next });
   for (const l of listeners) l();
 }
 
