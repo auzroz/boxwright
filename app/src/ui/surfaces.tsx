@@ -157,6 +157,7 @@ export function TextField(props: {
   returnKeyType?: TextInputProps["returnKeyType"];
   /** When editing ends by any route: blur or return. */
   onEndEditing?: () => void;
+  onFocus?: () => void;
   /** Return only. */
   onSubmit?: () => void;
   autoFocus?: boolean;
@@ -183,6 +184,7 @@ export function TextField(props: {
         textContentType={props.textContentType}
         returnKeyType={props.returnKeyType}
         onEndEditing={props.onEndEditing}
+        onFocus={props.onFocus}
         onSubmitEditing={props.onSubmit ?? props.onEndEditing}
         autoFocus={props.autoFocus}
         accessibilityLabel={props.accessibilityLabel ?? props.label}
