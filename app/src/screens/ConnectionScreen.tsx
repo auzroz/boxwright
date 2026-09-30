@@ -13,6 +13,7 @@ import { Button, Segmented, ToggleRow } from "../ui/controls";
 import { setUnits, useUnits } from "../units";
 import type { UnitSystem } from "../units";
 import { Icon } from "../ui/Icon";
+import { secretShowsInput } from "../ui/secret";
 import { Group, Notice, TextField } from "../ui/surfaces";
 import { Header, Screen } from "../ui/Screen";
 
@@ -280,7 +281,7 @@ function ServerSettings(props: Parameters<typeof ConnectionScreen>[0]) {
 function SecretField(props: { label: string; value: string; placeholder: string; error?: string; onChange: (v: string) => void }) {
   const { accent } = useTheme();
   const [editing, setEditing] = useState(false);
-  if (editing || props.value === "") {
+  if (secretShowsInput(editing, props.value)) {
     return (
       <TextField
         label={props.label}
@@ -290,6 +291,10 @@ function SecretField(props: { label: string; value: string; placeholder: string;
         literal
         textContentType="none"
         autoFocus={editing}
+        // Focus is what makes it "being edited". Without this, typing into an
+        // empty field made it non-empty, which swapped the input for the dots
+        // after the first character and took the keyboard away with it.
+        onFocus={() => setEditing(true)}
         onEndEditing={() => setEditing(false)}
         onChange={props.onChange}
       />
