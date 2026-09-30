@@ -38,20 +38,24 @@ platform :ios do
   lane :beta do
     api_key = asc_api_key
 
-    # Build numbers only have to increase per marketing version. Asking
-    # TestFlight for the last one means two Macs, or a lost local counter,
-    # can never upload a duplicate. Passed as a build setting rather than
-    # written into the project, so an upload never leaves the tree dirty.
-    build_number = latest_testflight_build_number(api_key: api_key, initial_build_number: 0) + 1
+    # Build numbers only have to increase per marketing version. Asking App
+    # Store Connect for the last one means two Macs, or a lost local counter,
+    # can never upload a duplicate -- and it has to count UPLOADS, not only
+    # TestFlight builds: an upload Apple rejected never becomes a build, yet
+    # its number is spent. Passed as a build setting rather than written into
+    # the project, so an upload never leaves the tree dirty.
+    tested = latest_testflight_build_number(api_key: api_key, initial_build_number: 0)
+    build_number = [tested, upload_versions(api_key).max || 0].max + 1
 
     signed_archive(build_number)
 
     upload_to_testflight(
       api_key: api_key,
-      # Internal testers only for 0.1 (docs/RELEASE.md, decision 3), so
-      # there is nothing to wait for.
+      # Processing is not waited for (internal testers only for 0.1,
+      # docs/RELEASE.md decision 3) -- but ingestion is, below.
       skip_waiting_for_build_processing: true,
     )
+    await_ingestion(api_key, build_number)
   end
 
   desc "Build and sign the App Store archive without uploading it"
@@ -60,6 +64,49 @@ platform :ios do
     # App ID and the Xcode account, so it proves signing and export before an
     # upload is possible or wanted.
     signed_archive(1)
+  end
+
+  # Apple's record of every upload of this app, which -- unlike the TestFlight
+  # build list -- includes the ones it refused, and says why.
+  def build_uploads(api_key)
+    require "net/http"
+    require "json"
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+    uri = URI("https://api.appstoreconnect.apple.com/v1/apps/#{app.id}/buildUploads?limit=200")
+    req = Net::HTTP::Get.new(uri)
+    req["Authorization"] = "Bearer #{Spaceship::ConnectAPI.token.text}"
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    UI.user_error!("App Store Connect build uploads: HTTP #{res.code}") unless res.is_a?(Net::HTTPSuccess)
+    JSON.parse(res.body).fetch("data", []).map { |u| u["attributes"] }
+  end
+
+  def upload_versions(api_key)
+    build_uploads(api_key).map { |a| a["cfBundleVersion"].to_i }
+  end
+
+  # Waits for Apple to accept or refuse the upload, and fails the lane with
+  # Apple's own words when it refuses. Without this a refusal arrives only by
+  # email: the first upload of 0.1.0 "succeeded" here and was rejected minutes
+  # later (ITMS-90683, a missing purpose string), invisible to the lane.
+  def await_ingestion(api_key, build_number, timeout: 20 * 60)
+    deadline = Time.now + timeout
+    loop do
+      upload = build_uploads(api_key).find { |a| a["cfBundleVersion"].to_i == build_number }
+      state = upload && upload["state"]
+      case state && state["state"]
+      when "FAILED"
+        errors = (state["errors"] || []).map { |e| "#{e["code"]}: #{e["description"]}" }
+        UI.user_error!("App Store Connect refused build #{build_number}:\n#{errors.join("\n")}")
+      when "COMPLETE"
+        (state["warnings"] || []).each { |w| UI.important("#{w["code"]}: #{w["description"]}") }
+        UI.success("Build #{build_number} accepted; TestFlight processing continues")
+        return
+      end
+      UI.user_error!("Build #{build_number} was not accepted or refused within #{timeout / 60} minutes") if Time.now > deadline
+      UI.message("Waiting for App Store Connect to check build #{build_number} (#{state ? state["state"] : "not listed yet"})")
+      sleep 30
+    end
   end
 
   def asc_api_key
