@@ -112,17 +112,19 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
       SDK"): fixed before the public release (AppDelegate.swift's
       SceneDelegate). `ios.yml` compiles on an older Xcode and could not have
       seen it.
-- [ ] **Create the app record** in App Store Connect (My Apps > +, bundle id
+- [x] **Create the app record** in App Store Connect (My Apps > +, bundle id
       `app.boxwright`, SKU anything) and an **App Store Connect API key**
       (Users and Access > Integrations, App Manager). Keep the `.p8` outside
       the repo.
-- [ ] **`cd app/ios && bundle exec fastlane beta`**: archives, signs through
-      Xcode's automatic signing authenticated by the App Store Connect API
-      key (no Apple ID needed in Xcode), takes the next build number from
-      TestFlight, uploads. The key, the Issuer ID and the team come from the
-      environment or a gitignored `app/ios/fastlane/.env` -- see the
+- [x] **`cd app/ios && bundle exec fastlane beta`**: archives, signs with
+      Xcode's automatic signing through the Apple ID signed in to Xcode (App
+      Store distribution uses a cloud-managed certificate, which an App
+      Manager API key may not sign with), takes the next build number from
+      TestFlight and uploads with the API key. Key, Issuer ID and team come
+      from the environment or a gitignored `app/ios/fastlane/.env` -- see the
       Fastfile's header. The marketing version is `MARKETING_VERSION` in the
-      Xcode project (0.1.0).
+      Xcode project (0.1.0). First upload: build 1 of 0.1.0, 2026-09-29.
+      `fastlane archive` builds and signs without uploading.
 - [ ] **Read the email Apple sends after the first upload.** Missing
       privacy-manifest reasons arrive there as ITMS-91053 warnings rather than
       as a failed upload. The app's manifest declares what

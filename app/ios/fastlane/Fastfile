@@ -8,16 +8,24 @@
 #   cd app && bundle install && (cd ios && bundle exec pod install)
 #   cd ios && bundle exec fastlane beta
 #
-# Everything authenticates with an App Store Connect API key (Users and Access >
-# Integrations > App Store Connect API, "App Manager" role): the upload, the
-# build-number lookup, and Xcode's own signing, so no Apple ID has to be
-# signed in to Xcode. Keep the .p8 outside the repo and point at it, either
-# exported or in ios/fastlane/.env (gitignored; fastlane reads it itself):
+# Two credentials, each for what only it can do:
+#
+# - Signing: the Apple ID signed in to Xcode (Xcode > Settings > Accounts), on
+#   the team below. App Store distribution uses a cloud-managed certificate,
+#   which an API key may use only with the Admin role.
+# - TestFlight: an App Store Connect API key (Users and Access > Integrations >
+#   App Store Connect API, "App Manager" role) for the build-number lookup and
+#   the upload. Keep the .p8 outside the repo and point at it, either exported
+#   or in ios/fastlane/.env (gitignored; fastlane reads it itself):
 #
 #   ASC_KEY_ID=ABC123DEFG
 #   ASC_ISSUER_ID=00000000-0000-0000-0000-000000000000
 #   ASC_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_ABC123DEFG.p8
 #   APPLE_TEAM_ID=ABCDE12345          # Membership details on developer.apple.com
+#
+# app.boxwright must be registered as an App ID on that team (Certificates,
+# Identifiers & Profiles, or the API) and have an App Store Connect record
+# (My Apps > +; the API cannot create one) before the first upload.
 #   DERIVED_DATA_PATH=/some/big/disk  # optional; Xcode's default otherwise
 #
 # The team is not in the Xcode project on purpose -- a fork must be able to
@@ -28,23 +36,7 @@ default_platform(:ios)
 platform :ios do
   desc "Build a release archive and upload it to TestFlight"
   lane :beta do
-    key_path = File.expand_path(ENV.fetch("ASC_KEY_PATH"))
-    api_key = app_store_connect_api_key(
-      key_id: ENV.fetch("ASC_KEY_ID"),
-      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-      key_filepath: key_path,
-    )
-
-    # The same key for xcodebuild's automatic signing, in the archive AND the
-    # export: -allowProvisioningUpdates alone relies on an Apple ID signed in
-    # to Xcode, and without it on the export step the distribution profile is
-    # never fetched and the export fails after a full archive.
-    signing = [
-      "-allowProvisioningUpdates",
-      "-authenticationKeyPath #{key_path.shellescape}",
-      "-authenticationKeyID #{ENV.fetch("ASC_KEY_ID").shellescape}",
-      "-authenticationKeyIssuerID #{ENV.fetch("ASC_ISSUER_ID").shellescape}",
-    ].join(" ")
+    api_key = asc_api_key
 
     # Build numbers only have to increase per marketing version. Asking
     # TestFlight for the last one means two Macs, or a lost local counter,
@@ -52,30 +44,57 @@ platform :ios do
     # written into the project, so an upload never leaves the tree dirty.
     build_number = latest_testflight_build_number(api_key: api_key, initial_build_number: 0) + 1
 
-    build_app(
-      workspace: "Boxwright.xcworkspace",
-      scheme: "Boxwright",
-      configuration: "Release",
-      export_method: "app-store",
-      # Xcode creates or refreshes the distribution certificate and profile
-      # for app.boxwright itself (automatic signing), on the team given here.
-      xcargs: [
-        "CURRENT_PROJECT_VERSION=#{build_number}",
-        "DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID").shellescape}",
-        "CODE_SIGN_STYLE=Automatic",
-        signing,
-      ].join(" "),
-      export_xcargs: signing,
-      export_team_id: ENV.fetch("APPLE_TEAM_ID"),
-      derived_data_path: ENV["DERIVED_DATA_PATH"],
-      output_directory: "build",
-    )
+    signed_archive(build_number)
 
     upload_to_testflight(
       api_key: api_key,
       # Internal testers only for 0.1 (docs/RELEASE.md, decision 3), so
       # there is nothing to wait for.
       skip_waiting_for_build_processing: true,
+    )
+  end
+
+  desc "Build and sign the App Store archive without uploading it"
+  lane :archive do
+    # Needs no API key and no App Store Connect record, only the registered
+    # App ID and the Xcode account, so it proves signing and export before an
+    # upload is possible or wanted.
+    signed_archive(1)
+  end
+
+  def asc_api_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: File.expand_path(ENV.fetch("ASC_KEY_PATH")),
+    )
+  end
+
+  def signed_archive(build_number)
+    build_app(
+      workspace: "Boxwright.xcworkspace",
+      scheme: "Boxwright",
+      configuration: "Release",
+      export_method: "app-store",
+      # Automatic signing on the team given here, by the Apple ID signed in
+      # to Xcode (Xcode > Settings > Accounts), NOT the API key: App Store
+      # distribution uses a cloud-managed certificate, and Apple lets an API
+      # key sign with one only if the key has the Admin role -- an App Manager
+      # key gets "Cloud signing permission error" at export, after a full
+      # archive. The account holder's Apple ID may.
+      #
+      # gym passes xcargs to the export as well as the archive, so
+      # -allowProvisioningUpdates here covers both: Xcode creates or refreshes
+      # the distribution profile for app.boxwright as it exports.
+      xcargs: [
+        "CURRENT_PROJECT_VERSION=#{build_number}",
+        "DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID").shellescape}",
+        "CODE_SIGN_STYLE=Automatic",
+        "-allowProvisioningUpdates",
+      ].join(" "),
+      export_team_id: ENV.fetch("APPLE_TEAM_ID"),
+      derived_data_path: ENV["DERIVED_DATA_PATH"],
+      output_directory: "build",
     )
   end
 end
