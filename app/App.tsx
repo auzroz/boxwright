@@ -68,7 +68,19 @@ import {
   storedPhotoUri,
 } from "./src/photo";
 import type { PersistedPhoto } from "./src/photo";
-import { fillSummary, formatDims, normalizeDims, parseCapacity, parseDims, wantsFillCheck } from "./src/capacity";
+import { fillSummary, normalizeDims, wantsFillCheck } from "./src/capacity";
+import {
+  dimsFieldText,
+  formatDimsIn,
+  formatVolume,
+  lengthUnit,
+  parseCapacityIn,
+  parseDimsIn,
+  toggleUnits,
+  useUnits,
+  volumeUnit,
+} from "./src/units";
+import type { UnitSystem } from "./src/units";
 import { DepthCamera, DepthKit, callback } from "boxwright-depth";
 import type { DepthCameraMode, DepthCameraRef, DepthCapture, DepthStatus } from "boxwright-depth";
 import { FILL_GUIDE, measureFillFromFile } from "./src/lidar";
@@ -2044,6 +2056,7 @@ function LocationPicker(props: { onDone: () => void }) {
  * what is filled in is written -- nothing else about a container is touched.
  */
 function ContainerSetup(props: { onDone: () => void }) {
+  const system = useUnits();
   const [boxes, setBoxes] = useState<Box[] | null>(null);
   const [types, setTypes] = useState<ContainerType[]>([]);
   const [error, setError] = useState("");
@@ -2084,13 +2097,17 @@ function ContainerSetup(props: { onDone: () => void }) {
     if (isNew) {
       const name = newName.trim();
       if (name === "") return { problem: "Name the new type, as you would call it." };
-      const litres = parseCapacity(capacityText);
-      if (litres === undefined) return { problem: "Say how much it holds: litres, or gallons like \"27 gal\"." };
+      const litres = parseCapacityIn(capacityText, system);
+      if (litres === undefined) {
+        return { problem: `Say how much it holds, like ${system === "metric" ? "\"100\" (litres)" : "\"27\" (gallons)"}.` };
+      }
       set.containerType = name;
       set.capacityL = litres;
       if (interiorText.trim() !== "") {
-        const inside = parseDims(interiorText);
-        if (!inside) return { problem: "Inside size is three numbers in centimetres, like 70 x 45 x 38." };
+        const inside = parseDimsIn(interiorText, system);
+        if (!inside) {
+          return { problem: `Inside size is three numbers, like ${system === "metric" ? "66 x 41 x 33" : "26 x 16 x 13"}.` };
+        }
         set.interiorCm = inside;
       }
     } else if (existing) {
@@ -2154,8 +2171,8 @@ function ContainerSetup(props: { onDone: () => void }) {
         const on = selected[b.id] === true;
         const known = [
           b.containerType || "",
-          typeof b.capacityL === "number" ? `${b.capacityL} L` : "",
-          b.interiorCm ? formatDims(b.interiorCm) : "",
+          typeof b.capacityL === "number" ? formatVolume(b.capacityL, system) : "",
+          b.interiorCm ? formatDimsIn(b.interiorCm, system) : "",
           fillSummary(b) ?? "",
         ].filter((part) => part !== "");
         return (
@@ -2202,14 +2219,29 @@ function ContainerSetup(props: { onDone: () => void }) {
           </View>
           {existing && (
             <Text style={styles.hint}>
-              {existing.capacityL} L{existing.interiorCm ? `, ${formatDims(existing.interiorCm)} inside` : ""}
+              {formatVolume(existing.capacityL, system)}
+              {existing.interiorCm ? `, ${formatDimsIn(existing.interiorCm, system)} inside` : ""}
             </Text>
           )}
           {isNew && (
             <>
               <Field label="Type name, as you call it" value={newName} onChange={setNewName} />
-              <Field label="How much it holds (litres, or gallons like 27 gal)" value={capacityText} onChange={setCapacityText} />
-              <Field label="Inside size in cm (optional), like 70 x 45 x 38" value={interiorText} onChange={setInteriorText} />
+              <View style={styles.fieldHead}>
+                <Text style={[styles.fieldLabel, styles.fieldHeadLabel]}>
+                  Numbers are in {system === "metric" ? "litres and cm" : "gallons and inches"}
+                </Text>
+                <UnitSwitch system={system} kind="volume" />
+              </View>
+              <Field
+                label={`How much it holds (${system === "metric" ? "litres" : "gallons"})`}
+                value={capacityText}
+                onChange={setCapacityText}
+              />
+              <Field
+                label={`Inside size in ${system === "metric" ? "cm" : "inches"} (optional), like ${system === "metric" ? "66 x 41 x 33" : "26 x 16 x 13"}`}
+                value={interiorText}
+                onChange={setInteriorText}
+              />
             </>
           )}
 
@@ -2286,12 +2318,13 @@ function ItemCard(props: {
 }) {
   const draft = props.draft;
   const item = draft.item;
+  const system = useUnits();
   const incomplete = item.name.trim() === "" || item.category === "";
   const summary = [
     item.category === "" ? "" : categoryLabel(item.category, props.categories),
     // The bucket measures an item against a container, so it says nothing
     // about something that does not go in one.
-    item.bulky ? "too big for a box" : sizePhrase(item),
+    item.bulky ? "too big for a box" : sizePhrase(item, system),
     item.weightClass,
     item.fragile ? "fragile" : "",
   ]
@@ -2805,10 +2838,37 @@ const FILL_CHOICES: [string, number][] = [
 ];
 
 /** An item's size for a summary line: measured, estimated, or its bucket. */
-function sizePhrase(item: ItemDraft): string {
+function sizePhrase(item: ItemDraft, system: UnitSystem): string {
   const dims = normalizeDims(item.dimensionsCm);
   if (!dims) return item.sizeBucket;
-  return item.dimensionsSource === "vision" ? `≈${formatDims(dims)}` : formatDims(dims);
+  return item.dimensionsSource === "vision" ? `≈${formatDimsIn(dims, system)}` : formatDimsIn(dims, system);
+}
+
+/**
+ * The one place units are switched: a small "cm | in" (or "L | gal") beside a
+ * measurement, where the question comes up. It flips the whole app, not just
+ * this field -- a phone is metric or imperial, not both -- and only how
+ * numbers are shown and read; everything stored stays metric.
+ */
+function UnitSwitch(props: { system: UnitSystem; kind: "length" | "volume" }) {
+  const names = props.kind === "length" ? (["cm", "in"] as const) : (["L", "gal"] as const);
+  const active = props.kind === "length" ? lengthUnit(props.system) : volumeUnit(props.system);
+  return (
+    <Pressable
+      style={styles.unitSwitch}
+      accessibilityRole="switch"
+      accessibilityLabel={`Units: ${props.system}. Switch to ${props.system === "metric" ? "imperial" : "metric"}`}
+      accessibilityState={{ checked: props.system === "imperial" }}
+      onPress={toggleUnits}
+      hitSlop={8}
+    >
+      {names.map((n) => (
+        <Text key={n} style={[styles.unitSwitchText, n === active && styles.unitSwitchActive]}>
+          {n}
+        </Text>
+      ))}
+    </Pressable>
+  );
 }
 
 /**
@@ -2826,10 +2886,12 @@ function SizeField(props: {
   source: ItemDraft["dimensionsSource"];
   onChange: (dims: Dims | null) => void;
 }) {
-  const shown = props.dims ? `${props.dims.l} x ${props.dims.w} x ${props.dims.h}` : "";
+  const system = useUnits();
+  const shown = props.dims ? dimsFieldText(props.dims, system) : "";
   const [text, setText] = useState(shown);
   const [bad, setBad] = useState(false);
-  // A new estimate or a LiDAR measurement replaces what was shown.
+  // A new estimate, a LiDAR measurement or a switch of units replaces what
+  // was shown.
   useEffect(() => {
     setText(shown);
     setBad(false);
@@ -2845,12 +2907,20 @@ function SizeField(props: {
           : "optional; the size above is used without it";
 
   function commit(): void {
+    // Only an edit is a measurement. Tapping in and out of the field must not
+    // turn the model's estimate into a "manual" size -- which the engine
+    // treats as a fact that can rule containers out -- and in inches the
+    // shown text is rounded, so reading it back would move the size too.
+    if (text === shown) {
+      setBad(false);
+      return;
+    }
     if (text.trim() === "") {
       setBad(false);
       if (props.dims) props.onChange(null);
       return;
     }
-    const parsed = parseDims(text);
+    const parsed = parseDimsIn(text, system);
     if (!parsed) {
       setBad(true);
       return;
@@ -2861,19 +2931,28 @@ function SizeField(props: {
 
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>Size in cm — {origin}</Text>
+      <View style={styles.fieldHead}>
+        <Text style={[styles.fieldLabel, styles.fieldHeadLabel]}>
+          Size in {system === "metric" ? "cm" : "inches"} — {origin}
+        </Text>
+        <UnitSwitch system={system} kind="length" />
+      </View>
       <TextInput
         style={styles.input}
         value={text}
         onChangeText={setText}
         onEndEditing={commit}
         onSubmitEditing={commit}
-        placeholder="30 x 20 x 10"
+        placeholder={system === "metric" ? "30 x 20 x 10" : "12 x 8 x 4"}
         keyboardType="numbers-and-punctuation"
         returnKeyType="done"
-        accessibilityLabel="Size in centimetres, three numbers"
+        accessibilityLabel={`Size in ${system === "metric" ? "centimetres" : "inches"}, three numbers`}
       />
-      {bad && <Text style={styles.needsAttention}>Three numbers in centimetres, like 30 x 20 x 10.</Text>}
+      {bad && (
+        <Text style={styles.needsAttention}>
+          Three numbers, like {system === "metric" ? "30 x 20 x 10" : "12 x 8 x 4"} — add cm or in to use the other unit.
+        </Text>
+      )}
     </View>
   );
 }
@@ -3036,6 +3115,18 @@ function Toggle(props: { label: string; onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
+  fieldHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  fieldHeadLabel: { flex: 1 },
+  unitSwitch: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#c9c9c9",
+    borderRadius: 14,
+    overflow: "hidden",
+    minHeight: 28,
+  },
+  unitSwitchText: { paddingHorizontal: 10, paddingVertical: 4, fontSize: 14, color: "#555" },
+  unitSwitchActive: { backgroundColor: "#1a1a1a", color: "#fff", fontWeight: "600" },
   cameraRoot: { flex: 1, backgroundColor: "#000" },
   cameraGuide: { position: "absolute", borderWidth: 2, borderColor: "#fff", borderRadius: 6 },
   cameraHint: {

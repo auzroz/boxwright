@@ -34,45 +34,6 @@ export function dimsLitres(d: Dims): number {
   return (d.l * d.w * d.h) / 1000;
 }
 
-function side(v: number): string {
-  return String(Math.round(v * 10) / 10);
-}
-
-/** "32 × 20 × 12 cm", for people. */
-export function formatDims(d: Dims): string {
-  return `${side(d.l)} × ${side(d.w)} × ${side(d.h)} cm`;
-}
-
-/**
- * Reads a size as a person types it: "70x45x38", "70 × 45 × 38 cm",
- * "70*45*38". Mirrors placement.ParseDims.
- */
-export function parseDims(text: string): Dims | undefined {
-  let s = text.trim().toLowerCase();
-  if (s.endsWith("cm")) s = s.slice(0, -2);
-  s = s.replace(/[×*,]/g, "x");
-  const parts = s.split("x");
-  if (parts.length !== 3) return undefined;
-  const n = parts.map((p) => (p.trim() === "" ? NaN : Number(p.trim())));
-  if (n.some((v) => !Number.isFinite(v))) return undefined;
-  return normalizeDims({ l: n[0]!, w: n[1]!, h: n[2]! });
-}
-
-const LITRES_PER_US_GALLON = 3.785411784;
-
-/**
- * A capacity as a person types it: "100", "100 L", "27 gal", "27 gallons".
- * Whole litres, as stored; undefined when it is not a believable one.
- */
-export function parseCapacity(text: string): number | undefined {
-  const m = /^\s*(\d+(?:\.\d+)?)\s*(l|litres?|liters?|gal|gallons?)?\s*$/i.exec(text);
-  if (!m) return undefined;
-  const n = Number(m[1]);
-  const litres = /^gal/i.test(m[2] ?? "") ? n * LITRES_PER_US_GALLON : n;
-  const whole = Math.round(litres);
-  return whole > 0 && whole <= 10000 ? whole : undefined;
-}
-
 type Sized = Pick<ItemDraft, "sizeBucket" | "quantity" | "dimensionsCm" | "dimensionsSource">;
 
 /**
