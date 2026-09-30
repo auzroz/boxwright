@@ -100,7 +100,8 @@ you point it at (no over-the-air updates, no crash reporter, no telemetry).
 
 ```bash
 cd app/ios
-export ASC_KEY_ID=... ASC_ISSUER_ID=... ASC_KEY_PATH=~/.appstoreconnect/AuthKey_....p8
+export ASC_KEY_ID=... ASC_ISSUER_ID=... ASC_KEY_PATH=~/.appstoreconnect/AuthKey_....p8 APPLE_TEAM_ID=...
+# (or put the same four in app/ios/fastlane/.env, which is gitignored)
 bundle exec fastlane beta               # archive, sign, upload to TestFlight
 ```
 

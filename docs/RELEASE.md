@@ -112,20 +112,29 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
       SDK"): fixed before the public release (AppDelegate.swift's
       SceneDelegate). `ios.yml` compiles on an older Xcode and could not have
       seen it.
-- [ ] **Create the app record** in App Store Connect (My Apps > +, bundle id
+- [x] **Create the app record** in App Store Connect (My Apps > +, bundle id
       `app.boxwright`, SKU anything) and an **App Store Connect API key**
       (Users and Access > Integrations, App Manager). Keep the `.p8` outside
       the repo.
-- [ ] **`cd app/ios && bundle exec fastlane beta`**: archives, signs with the
-      account signed in to Xcode, takes the next build number from
-      TestFlight, uploads. The marketing version is `MARKETING_VERSION` in
-      the Xcode project (0.1.0).
-- [ ] **Read the email Apple sends after the first upload.** Missing
+- [x] **`cd app/ios && bundle exec fastlane beta`**: archives, signs with
+      Xcode's automatic signing through the Apple ID signed in to Xcode (App
+      Store distribution uses a cloud-managed certificate, which an App
+      Manager API key may not sign with), takes the next build number from
+      TestFlight and uploads with the API key. Key, Issuer ID and team come
+      from the environment or a gitignored `app/ios/fastlane/.env` -- see the
+      Fastfile's header. The marketing version is `MARKETING_VERSION` in the
+      Xcode project (0.1.0). First uploads, 2026-09-29: build 1 refused at
+      ingestion (ITMS-90683, the photo-library purpose string the image
+      picker's linked code requires); build 2 accepted, no warnings. The lane
+      now waits for that verdict and fails with Apple's words.
+      `fastlane archive` builds and signs without uploading.
+- [x] **Read the email Apple sends after the first upload.** Missing
       privacy-manifest reasons arrive there as ITMS-91053 warnings rather than
       as a failed upload. The app's manifest declares what
       `react-native-file-access` touches; MMKV and the image picker ship their
       own. Any warning is a line to add to `PrivacyInfo.xcprivacy` and to
-      `scripts/check-ios-config.sh`.
+      `scripts/check-ios-config.sh`. The lane also prints the warnings App
+      Store Connect records on the upload; build 2 had none.
 - [ ] **App Store Connect privacy answers: "Data Not Collected".** Photos and
       item details go only to the server the user runs; the developer never
       receives them. Privacy policy URL: `docs/PRIVACY.md` on GitHub.

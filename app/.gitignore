@@ -13,6 +13,7 @@ vendor/bundle/
 
 # fastlane output
 ios/fastlane/report.xml
+ios/fastlane/README.md
 ios/fastlane/Preview.html
 ios/fastlane/screenshots
 ios/fastlane/test_output

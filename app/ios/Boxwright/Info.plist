@@ -37,6 +37,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Boxwright photographs items to identify and catalog them.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Boxwright uses only the photo you pick, through the system picker. It never browses your library.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Boxwright connects to the Boxwright server you run on your own network.</string>
 	<key>RCTNewArchEnabled</key>

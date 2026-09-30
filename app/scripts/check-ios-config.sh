@@ -36,11 +36,23 @@ check(info.get("UIUserInterfaceStyle") == "Light", "appearance is pinned to ligh
 
 # Every permission string is a question iOS may put to the user. Only ask for
 # what the app uses; a new one here must be a deliberate edit to this list.
-# There is no photo-library string on purpose: the system picker needs none.
-allowed = {"NSCameraUsageDescription", "NSLocalNetworkUsageDescription"}
+#
+# The photo-library string is one iOS never shows. "Choose an existing photo"
+# is the system picker, which needs no permission -- but react-native-image-
+# picker LINKS PHPhotoLibrary, and App Store Connect rejects any upload whose
+# code references it without the string (ITMS-90683; the first TestFlight
+# upload, 2026-09-29). It stays unshown only while the picker is asked for no
+# asset metadata: includeExtra true would make it request library access, so
+# that is checked below rather than trusted.
+allowed = {"NSCameraUsageDescription", "NSLocalNetworkUsageDescription", "NSPhotoLibraryUsageDescription"}
 asked = {k for k in info if k.endswith("UsageDescription")}
 check(asked <= allowed, f"no unexpected permission prompts (extra: {sorted(asked - allowed) or 'none'})")
 check(all(info[k] for k in asked), "no permission string is empty")
+app_source = (ios.parent / "App.tsx").read_text()
+check(
+    "includeExtra: false" in app_source and "includeExtra: true" not in app_source,
+    "the photo picker never asks for library access (includeExtra: false), so the photo-library string is never shown",
+)
 
 # LiDAR capture (modules/boxwright-depth) runs on ARKit, and ARKit reads the
 # motion sensors itself: it needs no motion permission, and the camera string
