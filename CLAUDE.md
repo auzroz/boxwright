@@ -28,6 +28,10 @@ collides with an active .NET storage SDK and every common TLD is registered.
    captures waiting to be filed (`queue.v2`) -- and the backend serves stale cache
    rather than failing. A photo file can be owned by either queue or by the
    capture on screen; `loadAll` is the only place that collects unowned ones.
+   The in-app demo (src/demo/) is a separate world: its own MMKV instance
+   (`boxwright-demo`) and `demo-captures/` directory, switched by
+   `useDemoStore`/`useDemoCaptures`, deleted on leaving. Preferences alone
+   are shared (`readDeviceText`). Nothing in the demo touches the network.
 5. No telemetry. Ever. This is a self-hosted, privacy-first project (AGPL-3.0).
 6. One backend may serve several Homeboxes, but only when told to. Everything
    cached about a Homebox is keyed on the credentials that reached it, so two
@@ -52,6 +56,8 @@ app/        bare React Native (TypeScript), no Expo — capture, review, file
                         is the only colour that can change (ThemeProvider)
   src/draft.ts          the capture under review, pure, shared by the screens
   src/prefs.ts          per-phone preferences (units, colours), one MMKV key
+  src/demo/             the in-app demo: sample inventory answering every API
+                        call (backend.ts), isolation (session.ts); for App Review
   src/setup.ts          first-run setup steps; an existing user is never sent
                         through it (saved connection + no record = done)
   assets/fonts/         Fraunces (SIL OFL) for titles, listed in UIAppFonts

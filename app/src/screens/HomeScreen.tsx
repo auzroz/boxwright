@@ -20,6 +20,8 @@ const SHOWN_PENDING = 3;
  * for a photo that already exists, and whatever is still waiting for the user.
  */
 export function HomeScreen(props: {
+  /** The demo: sample data, and copy that says so. */
+  demo?: boolean;
   busy: boolean;
   placeCount: number;
   pending: PendingState;
@@ -106,8 +108,9 @@ export function HomeScreen(props: {
         <View style={styles.captureText}>
           <Text style={styles.captureTitle}>{noPlaces ? "Take a photo anyway" : "Take photo"}</Text>
           <Text style={styles.captureBody}>
-            One item, a shelf, or a whole container.
-            {DepthKit.isSupported ? " Each thing is measured with LiDAR." : " Sizes are estimated from the photo."}
+            {props.demo
+              ? "Try it on anything: the demo always finds a drill, some jars and string lights."
+              : `One item, a shelf, or a whole container. ${DepthKit.isSupported ? "Each thing is measured with LiDAR." : "Sizes are estimated from the photo."}`}
           </Text>
         </View>
       </Pressable>

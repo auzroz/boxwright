@@ -164,6 +164,11 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
   | Capture in airplane mode, file to a cached box, reconnect, foreground | Queue drains; item in Homebox with its photo |
   | Change server with a capture queued | Refused with the reason; token-only change allowed |
   | Force-quit and relaunch | Server settings and queue both survive |
+  | Fresh install | Welcome, then the four setup steps; Continue on Connect only after a passing test; no "Save Password?" sheet |
+  | Upgrade over the previous build | Straight to Home; never the welcome |
+  | Try the demo (from Welcome) | DEMO strip on every screen; photo, review, where they go, filed, fill answer all work with no server; airplane mode changes nothing |
+  | Leave the demo with real captures queued | The real queue and parked photos are exactly as they were; nothing from the demo is in Homebox |
+  | Homebox theme changed in the web UI | The app's accent follows on the next foreground (within 10 min); off in Settings keeps the amber |
 
   The LiDAR rows are the first real test of the camera module and the
   measurement: until now both ran only against synthetic depth frames.
@@ -203,12 +208,22 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
 
 3. **v0.1.0 is internal TestFlight only** (recommended). External TestFlight
    and the App Store both go through Apple review, and a reviewer must be able
-   to use the app, which for Boxwright means a public backend, a Homebox with
-   demo data, and credentials in the review notes. That is a server someone
-   runs and pays for, holding a token strangers are handed, and it is not
-   worth doing until the app is worth reviewing. Internal testing covers up to
-   100 people on the developer's App Store Connect team with no review at all.
-   Revisit for v0.2.
+   to use the app. That no longer needs a public backend: **the app has a
+   demo built in** (src/demo/) -- a sample inventory on the phone, reached
+   from "Try the demo" on the first screen, that never goes online and is
+   deleted on leaving. Internal testing covers up to 100 people on the
+   developer's App Store Connect team with no review at all. Revisit for v0.2.
+
+   Review notes, for when it is submitted:
+
+   > Boxwright files items into Homebox, a self-hosted inventory system, through
+   > a small server the user runs themselves; there is no account or cloud
+   > service. To review without one, tap **Try the demo** on the first screen.
+   > The demo uses a sample inventory stored on the device, needs no network,
+   > and identifies the same three example items in any photo. "Choose an
+   > existing photo" works on any device. Leave the demo from the banner at the
+   > top. LiDAR measurement appears only on iPhones with LiDAR; elsewhere sizes
+   > are estimated and can be typed.
 
 4. **No over-the-air updates.** An update service checks a vendor's servers
    on every launch, which is a phone-home by principle 5 whatever it carries.
@@ -243,7 +258,7 @@ Everything here is required for the `v0.1.0` tag. Tick in the PR that does it.
 
 ## After v0.1.0 (ordered)
 
-1. External TestFlight / App Store, once there is a review demo (decision 3).
+1. External TestFlight / App Store: the review demo exists (decision 3).
 2. Dark palette (decision 6).
 3. Android: generate `android/` from the React Native 0.86 template, package
    `app.boxwright`, then Play internal testing.

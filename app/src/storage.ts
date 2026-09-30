@@ -23,7 +23,44 @@ import { createMMKV } from "react-native-mmkv";
  * recovered queue can be read, quarantined or retried; a discarded one is a
  * set of captures that silently never existed.
  */
-const store = createMMKV({ id: "boxwright", recoveryStrategy: "recover-on-error" });
+const live = createMMKV({ id: "boxwright", recoveryStrategy: "recover-on-error" });
+
+/**
+ * The demo's store: the same keys, in a file of their own, so that nothing
+ * the demo queues or caches can be read by the real app -- or sent by it. See
+ * demo/session.ts.
+ */
+let demo: ReturnType<typeof createMMKV> | null = null;
+function demoStore(): ReturnType<typeof createMMKV> {
+  demo ??= createMMKV({ id: "boxwright-demo", recoveryStrategy: "recover-on-error" });
+  return demo;
+}
+
+/** Where the queue and caches are read and written: the real store, or the demo's. */
+let store = live;
+
+/** Points the queue and caches at the demo's store, or back at the real one. */
+export function useDemoStore(on: boolean): void {
+  store = on ? demoStore() : live;
+}
+
+/** Empties the demo's store. Everything in it was sample data. */
+export function clearDemoStore(): void {
+  demoStore().clearAll();
+}
+
+/**
+ * This phone's preferences, always from the real store: they belong to the
+ * phone, not to whichever inventory is showing, and one of them is whether
+ * the demo is on.
+ */
+export function readDeviceText(key: string): string | null {
+  return live.getString(key) ?? null;
+}
+
+export function writeDeviceJson(key: string, value: unknown): void {
+  live.set(key, JSON.stringify(value));
+}
 
 /** The stored text for `key`, or null when there is none. */
 export function readText(key: string): string | null {

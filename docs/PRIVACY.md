@@ -42,6 +42,11 @@ hardware.
 
 ## What stays on your device
 
+**The demo** ("Try the demo") runs entirely on the phone: its sample
+inventory, the photos you take in it and everything you file are kept apart
+from your real data, are never sent anywhere -- the demo makes no network
+requests at all -- and are deleted when you leave it.
+
 Photos waiting to be identified or reviewed, and captures waiting for signal (a
 photo and its item details), are kept in the app's private storage until they
 reach your server or you discard them, then deleted.

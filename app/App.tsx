@@ -8,7 +8,10 @@ import { DepthKit } from "boxwright-depth";
 import type { DepthCapture } from "boxwright-depth";
 
 import { catalog, entryError, errorMessage, identify, isRetriable, landed, recommend } from "./src/api";
-import { isConfigured, loadConnection, useConnection } from "./src/connection";
+import { currentConnection, isConfigured, loadConnection, useConnection } from "./src/connection";
+import { DemoBanner } from "./src/demo/DemoBanner";
+import { demoActive, useDemo } from "./src/demo/mode";
+import { enterDemo, leaveDemo, resumeDemoIfOn } from "./src/demo/session";
 import { cropRect } from "./src/crop";
 import { FALLBACK_CATEGORIES, isKnownCategory } from "./src/categories";
 import {
@@ -186,7 +189,8 @@ function Main() {
    * comes first. Never decided before the Keychain has been read: a returning
    * user would otherwise see the first-run screen flash past on every launch.
    */
-  const needsServer = server.loaded && !isConfigured(server.connection);
+  const demo = useDemo();
+  const needsServer = server.loaded && !isConfigured(server.connection) && !demo;
   /**
    * Which parked capture this screen is waiting on, or "" when it is not
    * waiting on one. Set while `step` is "waiting"; cleared the moment the user
@@ -201,6 +205,11 @@ function Main() {
   const [setup, setSetup] = useState<SetupStep | "done" | null>(null);
   useEffect(() => {
     if (!server.loaded || setup !== null) return;
+    // The demo needs no setup, and is not a reason to record it as done.
+    if (demoActive()) {
+      setSetup("done");
+      return;
+    }
     const start = startingStep(prefs(), isConfigured(server.connection));
     // Somebody already using the app is recorded as set up, so that losing
     // the connection later does not send them back through the welcome.
@@ -213,6 +222,46 @@ function Main() {
     setSetup(next);
   }
 
+  /**
+   * Into the demo, from the welcome screen or from settings. Everything from
+   * here reads and writes the demo's own store; the real one is untouched.
+   */
+  function startDemo(): void {
+    if (busy) return;
+    clearCapture(true);
+    enterDemo();
+    setSetup("done");
+    connectionSaved(true);
+  }
+
+  /** Out of the demo, deleting everything it made, back to where things were. */
+  function confirmLeaveDemo(): void {
+    Alert.alert("Leave the demo?", "Everything you did in it is deleted. Nothing was ever sent anywhere.", [
+      { text: "Stay", style: "cancel" },
+      {
+        text: "Leave",
+        style: "destructive",
+        onPress: () => {
+          // The photo on screen, if any, is the demo's; its directory goes below.
+          clearCapture(true);
+          void leaveDemo().then(() => {
+            setSetup(null);
+            const cached = cachedCategories();
+            setCategories(cached.length > 0 ? cached : [...FALLBACK_CATEGORIES]);
+            setCategoriesLive(cached.length > 0);
+            setPlaceCount(cachedBoxes().length);
+            if (isConfigured(currentConnection())) {
+              void refreshHomeboxTheme();
+              void refreshBoxCache().then(() => setPlaceCount(cachedBoxes().length));
+              void flushQueue();
+              void runIdentification();
+            }
+          });
+        },
+      },
+    ]);
+  }
+
   function finishSetup(photo: boolean): void {
     setPrefs({ setupDone: true, setupStep: undefined });
     setSetup("done");
@@ -221,6 +270,8 @@ function Main() {
   }
 
   useEffect(() => {
+    // Before anything reads the queue: back into the demo if it was left on.
+    resumeDemoIfOn();
     loadAll();
     // Off disk first and synchronously: the picker has to be usable in a
     // storage unit with no signal, where the fetch below will never land.
@@ -1094,15 +1145,25 @@ function Main() {
   function screen() {
     if (!server.loaded || setup === null) return <ActivityIndicator style={styles.spinner} size="large" />;
     if (setup !== "done") {
-      return <SetupFlow step={setup} onStep={goSetup} onConnected={connectionSaved} onFinish={finishSetup} />;
+      return (
+        <SetupFlow step={setup} onStep={goSetup} onConnected={connectionSaved} onFinish={finishSetup} onDemo={startDemo} />
+      );
     }
     if (needsServer || step === "connection") {
-      return <ConnectionScreen firstRun={needsServer} onDone={connectionSaved} />;
+      return (
+        <ConnectionScreen
+          firstRun={needsServer}
+          onDone={connectionSaved}
+          demo={demo ? { onLeave: confirmLeaveDemo, onBack: () => setStep("capture") } : undefined}
+          onTryDemo={needsServer ? undefined : startDemo}
+        />
+      );
     }
     switch (step) {
       case "capture":
         return (
           <HomeScreen
+            demo={demo}
             busy={busy}
             placeCount={placeCount}
             pending={pending}
@@ -1159,6 +1220,7 @@ function Main() {
       case "review":
         return (
           <ReviewScreen
+            demo={demo}
             back={{ label: "Start over", onPress: confirmAbandon, disabled: busy }}
             busy={busy}
             photo={photo}
@@ -1196,6 +1258,7 @@ function Main() {
       case "done":
         return (
           <DoneScreen
+            demo={demo}
             captureId={captureId}
             filed={filed}
             failures={failures}
@@ -1213,8 +1276,8 @@ function Main() {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="dark-content" />
-      {screen()}
+      <StatusBar barStyle={demo ? "light-content" : "dark-content"} />
+      {demo ? <DemoBanner onLeave={confirmLeaveDemo}>{screen()}</DemoBanner> : screen()}
       <DepthCaptureModal
         visible={depthCamera}
         mode="item"
