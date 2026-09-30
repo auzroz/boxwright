@@ -60,6 +60,7 @@ import { ConnectionScreen } from "./src/screens/ConnectionScreen";
 import { DoneScreen, InboxScreen, RecommendScreen, ReviewScreen, WaitingScreen } from "./src/screens/CaptureScreens";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { LocationsScreen } from "./src/screens/LocationsScreen";
+import { forgetHomeboxTheme, refreshHomeboxTheme, useAccent } from "./src/theme/sync";
 import { ThemeProvider } from "./src/theme/ThemeProvider";
 import { palette } from "./src/theme/tokens";
 import type {
@@ -75,9 +76,10 @@ import type {
 type Step = "capture" | "connection" | "setup" | "waiting" | "inbox" | "review" | "recommend" | "done";
 
 export default function App() {
+  const accent = useAccent();
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
+      <ThemeProvider accent={accent}>
         <Main />
       </ThemeProvider>
     </SafeAreaProvider>
@@ -203,6 +205,7 @@ function Main() {
       // reliable background execution -- so a capture parked on the way out of
       // a storage unit resumes here, on the way back in.
       void runIdentification();
+      void refreshHomeboxTheme();
       void refreshBoxCache().then(() => setPlaceCount(cachedBoxes().length));
       void refreshCategoryCache().then((list) => {
         if (!list) return;
@@ -244,6 +247,9 @@ function Main() {
    */
   function connectionSaved(moved: boolean): void {
     if (moved) {
+      // Another inventory, perhaps another person's Homebox: its colours are
+      // not these.
+      forgetHomeboxTheme();
       setCategories([...FALLBACK_CATEGORIES]);
       setCategoriesLive(false);
       setPlaceCount(cachedBoxes().length);
@@ -256,6 +262,7 @@ function Main() {
     });
     void flushQueue();
     void runIdentification();
+    void refreshHomeboxTheme();
     setStep("capture");
   }
 

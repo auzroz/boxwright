@@ -30,6 +30,9 @@ catalog in your own Homebox. Specifically:
   depth itself.
 - **Server address and tokens** you enter are stored on your device in the iOS
   Keychain and sent only to the servers they belong to.
+- **Your Homebox theme's name** (for example "forest") is read from your own
+  Homebox by your Boxwright server, so the app can use its colour. It is kept
+  on the phone with your other preferences and sent nowhere else.
 
 If your Boxwright server is configured to use a cloud vision model (for
 example OpenAI or Anthropic), it sends each photo to that provider for

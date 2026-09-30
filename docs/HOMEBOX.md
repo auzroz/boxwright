@@ -192,6 +192,26 @@ query parameter as well — which is what the first 401 body above is telling yo
 Homebox keeps it. What Homebox's own logs do with it was not measured; the
 header costs nothing, so there was no reason to find out.
 
+### The web UI theme: `GET /v1/users/self/settings` (2026-09-30)
+
+v0.26 syncs the web UI's preferences to the server, per USER (not per group):
+`GET /api/v1/users/self/settings` returns `{"item": {...}}`, a free-form
+object the browser writes with `PUT` on the same path. The theme is
+`item.theme`, a DaisyUI name (`homebox`, `garden`, `forest`, ...; the list is
+`frontend/lib/data/themes.ts`). A user who never changed it has no `theme`
+entry at all, and the web UI then shows `homebox`, so that is what Boxwright
+reports for an absent value. Both routes sit behind the same user middleware
+as every other `/v1` route (`backend/app/api/routes.go`).
+
+Whether an API key (not only a session) can read it is measured by the e2e
+job: the session `PUT`s `{"theme":"forest"}` and `/status`, holding only the
+API key, must report `homeboxTheme: "forest"`. A read that fails is cached as
+"unknown" and never marks Homebox down.
+
+The colours are not in the API. The app maps the name to that theme's
+`--primary` in `frontend/assets/css/main.css` (src/theme/homebox.ts), and
+darkens it where white text on it would fall short of 4.5:1.
+
 ### Backup caveat
 
 `GET /v1/entities/export` returns **CSV of items only**. Locations appear as a
