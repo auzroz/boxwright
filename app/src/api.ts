@@ -231,9 +231,8 @@ export async function probe(connection: Connection, signal?: AbortSignal): Promi
   if (!status.homebox?.ok) {
     warnings.push(`The server cannot reach Homebox: ${status.homebox?.error || "no reason given"}`);
   }
-  if (!status.identification) {
-    warnings.push("Identification is off on this server, so you will type each item in yourself.");
-  }
+  // Identification being off is not a warning: the connection screen already
+  // lists it among what works, and saying it twice read as a problem.
   if (!status.clientHomebox && (connection.homeboxUrl !== "" || connection.homeboxToken !== "")) {
     // Unreachable in practice -- such a request is refused with a 400 before
     // it gets here -- but worth saying if a proxy ever strips the headers.

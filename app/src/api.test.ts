@@ -125,13 +125,21 @@ describe("probe", () => {
 
   test.each([
     ["Homebox is down", { homebox: { ok: false, error: "dial tcp: refused" } }, "cannot reach Homebox: dial tcp"],
-    ["identification is off", { identification: false, aiProvider: "none" }, "type each item in yourself"],
     ["the server is newer", { apiVersion: 2 }, "newer than this app"],
   ])("a working server with a caveat: %s", async (_, patch, message) => {
     respond(200, { ...healthy, ...patch });
     const got = await probe(server);
     expect(got.ok).toBe(true);
     if (got.ok) expect(got.warnings.join(" ")).toContain(message);
+  });
+
+  // The screen lists it among what works ("Identification is off. You'll
+  // enter items by hand."); a warning saying it again read as a problem.
+  test("identification being off is reported by status, not as a warning", async () => {
+    respond(200, { ...healthy, identification: false, aiProvider: "none" });
+    const got = await probe(server);
+    expect(got.ok && got.status.identification).toBe(false);
+    if (got.ok) expect(got.warnings).toEqual([]);
   });
 });
 
