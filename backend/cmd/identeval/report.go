@@ -66,16 +66,16 @@ func report(set evalSet, runs []run, base string) error {
 	fmt.Fprintf(&b, "# Identification eval, %s\n\n", time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintf(&b, "%d calls over %d photos (labels v%d). Recall is must-find items named; the next columns are of the items found. Latency is wall time per photo, cost is list price per photo.\n\n",
 		len(runs), len(set.labels.Photos), set.labels.Version)
-	b.WriteString("| Config | Recall | Category | Count | Size | Size given | Flags | Extras/photo | Stable | p50 s | p90 s | Out tok | $/photo | Errors |\n")
-	b.WriteString("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+	b.WriteString("| Config | Recall | Category | Count | Size | Size given | Flags | Extras/photo | Stubs | Stable | p50 s | p90 s | Out tok | $/photo | Errors |\n")
+	b.WriteString("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
 	for _, s := range sums {
 		cost := "?"
 		if s.Priced {
 			cost = fmt.Sprintf("%.4f", s.USDPerPhoto)
 		}
-		fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s | %s | %.1f | %s | %.1f | %.1f | %.0f | %s | %d/%d |\n",
+		fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s | %s | %.1f | %d | %s | %.1f | %.1f | %.0f | %s | %d/%d |\n",
 			s.Config, pct(s.Recall), pct(s.Category), pct(s.Quantity), pct(s.Size), pct(s.SizeGiven), pct(s.Flags),
-			s.ExtrasPer, pct(s.Stable), s.LatencyP50, s.LatencyP90, s.OutTokens, cost, s.Errors, s.Runs)
+			s.ExtrasPer, s.Stubs, pct(s.Stable), s.LatencyP50, s.LatencyP90, s.OutTokens, cost, s.Errors, s.Runs)
 	}
 
 	// Per photo, per config: mean must-recall, so a weakness is visible where

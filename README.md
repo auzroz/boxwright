@@ -130,7 +130,7 @@ same way an archive does.
 | `AI_PROVIDER` | `openai`, `ollama`, `anthropic`, `claude-code`, or `none` | `none` |
 | `AI_BASE_URL` | e.g. `https://api.openai.com/v1` or `http://ollama:11434` | — (Anthropic: `https://api.anthropic.com`) |
 | `AI_API_KEY` | key for OpenAI-compatible and Anthropic providers | — |
-| `AI_MODEL` | e.g. `gpt-5-mini`, `gemma3:4b`, `qwen3-vl:8b` | — (Anthropic: `claude-opus-5`) |
+| `AI_MODEL` | e.g. `gpt-5-mini`, `gemma3:4b`, `qwen3-vl:8b` | — (Anthropic: `claude-sonnet-5-5`) |
 | `AI_EFFORT` | Anthropic: `low`, `medium`, `high`, `xhigh` or `max` | — (the model's own) |
 | `AI_THINKING` | Anthropic: `auto` (least the model allows) or `adaptive` | `auto` |
 | `CLAUDE_CLI_PATH` | `claude-code` only: path to the CLI | `claude` (from `PATH`) |
@@ -227,8 +227,10 @@ item draft and nothing else, and treats a refusal as "identify this one by
 hand" rather than an error.
 
 Both `AI_BASE_URL` and `AI_MODEL` default for it (`https://api.anthropic.com`,
-`claude-opus-5`), so `AI_PROVIDER=anthropic` plus `AI_API_KEY` is a complete
+`claude-sonnet-5-5`), so `AI_PROVIDER=anthropic` plus `AI_API_KEY` is a complete
 configuration. Set `AI_BASE_URL` to route through a proxy or gateway instead.
+The default is chosen by measurement, repeatable with `make identeval`; the
+latest results are in [docs/IDENTIFICATION.md](docs/IDENTIFICATION.md).
 
 Cost per million tokens (input/output); one photo is a few thousand input
 tokens and the reply is a couple hundred, so identification is fractions of a
@@ -236,9 +238,9 @@ cent per item:
 
 | Model | Input / output | When |
 |---|---|---|
-| `claude-opus-5` | $5 / $25 | default; best at reading faded labels and model numbers |
-| `claude-sonnet-5` | $2 / $10 | bulk cataloging |
-| `claude-haiku-4-5` | $1 / $5 | cheapest; fine for obvious household items |
+| `claude-sonnet-5-5` | $2 / $10 | default: every labelled item found, about $0.016 a photo |
+| `claude-opus-5-5` | $4 / $20 | no more accurate here, slower, and sometimes answers a crowded photo with a placeholder |
+| `claude-haiku-4-5` | $1 / $5 | cheapest; misses things in crowded photos |
 
 Use the plain model id — appending a date suffix pins a snapshot that retires.
 
@@ -330,10 +332,9 @@ never fails the probes.
 
 ## Known limitations
 
-- **Identification is not fast.** About five seconds per object found: 3s for
-  a single item, 73s for a shelf of sixteen. Cost tracks the same thing —
-  ~$0.007 to ~$0.022 a photo on Sonnet 5 — because 77% of the bill is output
-  tokens. Park a slow capture rather than waiting for it.
+- **Identification is not instant.** On Sonnet 5.5, about 2 s for a single item
+  and 13 s for a crowded shelf of ~19; about $0.016 a photo on average.
+  Park a slow capture rather than waiting for it.
 - **Parked captures only progress while the app is open.** React Native has no
   reliable background execution. The photo is durable, so nothing is lost; work
   resumes next time you open Boxwright.

@@ -20,14 +20,16 @@ type tuning struct {
 func WithEffort(effort string) Option { return func(t *tuning) { t.effort = effort } }
 
 // WithThinking sets how much the model may think before answering: "auto" (or
-// empty), the least the model allows, or "adaptive", the model decides.
+// empty) is what cmd/identeval measured best for the model's family, and the
+// least it allows for a family never measured; "least" is always the least it
+// allows; "adaptive" lets the model decide.
 func WithThinking(mode string) Option { return func(t *tuning) { t.thinking = mode } }
 
 // Efforts are the effort levels the Messages API accepts.
 var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
 
 // ThinkingModes are the values WithThinking accepts.
-var ThinkingModes = []string{"auto", "adaptive"}
+var ThinkingModes = []string{"auto", "least", "adaptive"}
 
 // ValidateTuning checks an effort and thinking mode as configured, so a typo
 // in AI_EFFORT fails at startup instead of on every photo.
@@ -67,12 +69,18 @@ type anthropicFamily struct {
 	// lowest is the thinking value that turns up-front thinking off, or "" when
 	// it cannot be turned off (adaptive thinking is always on).
 	lowest string
+	// adaptiveByDefault: cmd/identeval measured adaptive thinking as the
+	// better "auto" for this family. See docs/IDENTIFICATION.md.
+	adaptiveByDefault bool
 }
 
 // anthropicFamilies is matched longest prefix first, so claude-opus-5-5 is
 // never mistaken for claude-opus-5.
 var anthropicFamilies = []anthropicFamily{
-	{prefix: "claude-sonnet-5-5", effort: true, lowest: "between_tools"},
+	// Measured 2026-09-30: at its defaults (high, adaptive) it found every
+	// labelled item, got 98% of categories right (93% with between_tools)
+	// and invented nothing, for the same tokens and a lower p50.
+	{prefix: "claude-sonnet-5-5", effort: true, lowest: "between_tools", adaptiveByDefault: true},
 	{prefix: "claude-opus-5-5", effort: true, lowest: ""},
 	{prefix: "claude-fable-5", effort: true, lowest: ""},
 	{prefix: "claude-mythos-5", effort: true, lowest: ""},
@@ -121,8 +129,9 @@ func planFor(model string, t tuning) anthropicPlan {
 	}
 	// Neither "off" setting is accepted at the two highest efforts.
 	high := t.effort == "xhigh" || t.effort == "max"
+	adaptive := t.thinking == "adaptive" || ((t.thinking == "" || t.thinking == "auto") && fam.adaptiveByDefault)
 	switch {
-	case t.thinking == "adaptive":
+	case adaptive:
 		if fam.effort {
 			p.thinking = map[string]any{"type": "adaptive"}
 		} else {

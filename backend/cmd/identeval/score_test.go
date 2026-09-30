@@ -84,3 +84,16 @@ func TestSummarize(t *testing.T) {
 		t.Errorf("%+v", s)
 	}
 }
+
+func TestAStubAnswerIsFlagged(t *testing.T) {
+	want := []expected{{Name: "wrench", Match: []string{"wrench"}, Categories: []string{"tools"}, Quantity: [2]int{1, 9}, Must: true}}
+	if !scorePhoto(want, []placement.ItemDraft{d("placeholder", "tools", 1)}).Stub {
+		t.Error(`"placeholder" is a stub`)
+	}
+	if !scorePhoto(want, []placement.ItemDraft{d("x", "kitchen", 1)}).Stub {
+		t.Error(`"x" is a stub`)
+	}
+	if scorePhoto(want, []placement.ItemDraft{d("Wrench", "tools", 1)}).Stub {
+		t.Error("a real answer is not a stub")
+	}
+}

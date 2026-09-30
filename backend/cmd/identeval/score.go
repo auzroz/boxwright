@@ -29,6 +29,18 @@ type photoScore struct {
 	// real but unlabelled (the dense scenes list their likely extras as
 	// optional items so these stay meaningful).
 	Extras []string `json:"extras"`
+	// Stub: the answer contains a placeholder instead of an identification
+	// ("placeholder", "x"). Measured on the Opus family, which sometimes
+	// returns one such item for a crowded photo in about 90 output tokens.
+	Stub bool `json:"stub,omitempty"`
+}
+
+// stubNames are what a model writes when it gives up on the list.
+var stubNames = map[string]bool{"placeholder": true, "x": true, "item": true, "object": true, "unknown": true, "n/a": true, "": true}
+
+func isStub(name string) bool {
+	n := strings.ToLower(strings.TrimSpace(name))
+	return stubNames[n] || len([]rune(n)) <= 1
 }
 
 // scorePhoto matches each returned draft to the first expected item whose
@@ -38,6 +50,9 @@ func scorePhoto(want []expected, got []placement.ItemDraft) photoScore {
 	matched := make([][]placement.ItemDraft, len(want))
 	var ps photoScore
 	for _, d := range got {
+		if isStub(d.Name) {
+			ps.Stub = true
+		}
 		name := strings.ToLower(d.Name)
 		hit := -1
 		for i, e := range want {
@@ -139,6 +154,7 @@ type summary struct {
 	SizeGiven   float64 `json:"sizeGiven"` // of those, how often a size was returned at all
 	Flags       float64 `json:"flags"`     // bulky and fragile, where labelled
 	ExtrasPer   float64 `json:"extrasPerPhoto"`
+	Stubs       int     `json:"stubs"`  // answers that were a placeholder, not a list
 	Stable      float64 `json:"stable"` // photos whose must-item recall was identical across reps
 	LatencyP50  float64 `json:"latencyP50s"`
 	LatencyP90  float64 `json:"latencyP90s"`
@@ -194,6 +210,9 @@ func summarize(cfg string, runs []run, sizedItems int) summary {
 			count(it.FragileOK, &flOK, &flN)
 		}
 		extras += len(r.Score.Extras)
+		if r.Score.Stub {
+			s.Stubs++
+		}
 		if perPhoto[r.Photo] == nil {
 			perPhoto[r.Photo] = map[int]bool{}
 		}

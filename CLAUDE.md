@@ -19,7 +19,7 @@ collides with an active .NET storage SDK and every common TLD is registered.
    identification and LLM re-ranking are enhancements, never requirements.
 3. Model-agnostic where it counts. Five providers: `openai`, `ollama`,
    `anthropic`, `claude-code` (dev only), `none`. The Anthropic provider does
-   carry a default endpoint and model, which is a convenience and not a
+   carry a default endpoint and model (chosen by `make identeval`), which is a convenience and not a
    dependency -- `AI_BASE_URL` still overrides it, and no code path assumes a
    vendor. `AI_PROVIDER=none` must keep the app fully usable with manual entry,
    and a 422 from any provider routes to the same manual-entry form.
@@ -277,11 +277,12 @@ Measured, not estimated. Do not re-derive these.
 
 | Fact | Value |
 |---|---|
-| Identify latency | ~5s per object found: 3s for 1 item, 73s for 16. ~22 output tok/s |
-| Identify cost, Sonnet 5 | ~$0.0073 (1 item) to ~$0.022 (16). **77% is OUTPUT tokens** |
+| Identify latency, Sonnet 5.5 | p50 2.3s for 1 item, 13s for a dense scene of ~19 (Opus 5: 5.8s, 27s) |
+| Identify cost, Sonnet 5.5 | $0.016/photo mean over the eval set. **~58% is INPUT**: the prompt is ~4,700 tokens |
+| Model choice | `make identeval` (docs/IDENTIFICATION.md). Sonnet 5.5 found every labelled item; Opus 5/5.5 sometimes answer a crowded photo with ONE item named "placeholder" or "x" |
 | Cold box-index rebuild | ~21s for 80 chosen locations (1 list + 2 calls each, sequential) |
 | Region grounding | Sonnet 5 correct. Haiku 4.5 and gemma3:4b fail; their boxes are discarded |
-| Extended thinking | Declined in the Anthropic provider. Cost 1212 extra output tokens for no better answer, and did NOT change latency |
+| Thinking | Per model family (internal/ai/tuning.go). Declining it was right for Opus/Sonnet 5 (1212 extra output tokens, no better). On Sonnet 5.5 adaptive is BETTER at no extra cost, so `auto` = adaptive there. `thinking: disabled` is a 400 on Opus 5.5 |
 | Change-feed control ping | Opcode 0x9 every 54s, and the masked pong is MANDATORY: unanswered, Homebox closes the socket ~6s later. The 10s `{"event":"ping"}` TEXT frame is NOT what holds it open |
 | `entity.mutation` payload | 27 bytes, `{"event":"entity.mutation"}` and nothing else -- no id, no type, no operation. Our own writes echo, so self-suppression is TIME-BOXED (`beginWrite`), never correlated |
 

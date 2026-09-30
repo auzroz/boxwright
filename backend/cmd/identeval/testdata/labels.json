@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "about": "Ground truth for backend/cmd/identeval. Drafted by eye from each photo; lenient on purpose. An expected item matches a returned item when any `match` keyword is a substring of its name (case-insensitive). `must` items count toward recall; the others only stop a correct answer being counted as a false positive. `categories` lists every acceptable category key. `quantity` is [min, max] summed over every returned item that matches. `longestCm` is [min, max] for the longest side, where the real object's size is known; omitted otherwise. `bulky` true means it belongs on a floor, not in a container.",
   "categories": ["tools", "hardware", "kitchen", "decor", "electronics", "books-media", "outdoor", "garden", "crafts", "office", "household", "first-aid", "games", "paint", "toiletries", "food"],
   "photos": [
@@ -142,8 +142,8 @@
     {
       "id": "usb-charger", "kind": "multi",
       "items": [
-        { "name": "multi-tip USB charging cable", "match": ["cable", "cord", "charger"], "categories": ["electronics"], "quantity": [1, 1], "must": true },
-        { "name": "USB wall charger", "match": ["charger", "adapter", "plug", "power"], "categories": ["electronics"], "quantity": [1, 1], "must": true, "longestCm": [3, 8] }
+        { "name": "USB wall charger", "match": ["charger", "adapter", "plug", "power brick"], "categories": ["electronics"], "quantity": [1, 1], "must": true, "longestCm": [3, 8] },
+        { "name": "multi-tip USB charging cable", "match": ["cable", "cord"], "categories": ["electronics"], "quantity": [1, 1], "must": true }
       ]
     },
     {

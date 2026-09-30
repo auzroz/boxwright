@@ -20,9 +20,13 @@ const (
 	// proxy, gateway or on-prem relay works without patching the provider.
 	anthropicDefaultBaseURL = "https://api.anthropic.com"
 
-	// anthropicDefaultModel is Claude Opus 5 ($5/$25 per Mtok). Aliases carry
-	// no date suffix -- appending one pins a snapshot that eventually retires.
-	anthropicDefaultModel = "claude-opus-5"
+	// anthropicDefaultModel is Claude Sonnet 5.5 ($2/$10 per Mtok), chosen by
+	// cmd/identeval on 2026-09-30: it found every labelled item, returned no
+	// placeholder answers, and cost less than half of Claude Opus 5 -- which
+	// found 88% and twice answered a crowded photo with one item named
+	// "placeholder". docs/IDENTIFICATION.md has the table; re-run it when a
+	// model is released rather than editing this by hand.
+	anthropicDefaultModel = "claude-sonnet-5-5"
 
 	// anthropicVersion is the required API version header, not a model version.
 	anthropicVersion = "2023-06-01"

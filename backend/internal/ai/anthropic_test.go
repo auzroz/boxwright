@@ -291,8 +291,8 @@ func TestAnthropicDefaultsModelAndHost(t *testing.T) {
 	if _, err := p.Identify(context.Background(), []byte("x"), "image/jpeg", liveVocabulary()); err != nil {
 		t.Fatalf("Identify: %v", err)
 	}
-	if got := f.body["model"]; got != "claude-opus-5" {
-		t.Errorf("model = %v, want the claude-opus-5 default", got)
+	if got := f.body["model"]; got != "claude-sonnet-5-5" {
+		t.Errorf("model = %v, want the claude-sonnet-5-5 default (chosen by cmd/identeval)", got)
 	}
 
 	// With no AI_BASE_URL at all the provider must still target Anthropic.
@@ -591,9 +591,11 @@ func TestStructuredOutputSchemaStaysInsideTheSupportedSubset(t *testing.T) {
 // Extended thinking is declined on purpose: this is extraction against a fixed
 // schema, and leaving it on cost 1212 extra output tokens and 60 extra seconds
 // on a measured photo, for an answer that was no better.
+// Measured on the Opus 5 generation, and still the default for a family the
+// eval has not shown to do better with thinking.
 func TestThinkingIsDeclined(t *testing.T) {
 	f := newAnthropicFake(t, http.StatusOK, `{"content":[{"type":"text","text":"[]"}],"stop_reason":"end_turn"}`)
-	p := newAnthropicProvider(t, f.server.URL, "k", "")
+	p := newAnthropicProvider(t, f.server.URL, "k", "claude-opus-5")
 	_, _ = p.Identify(context.Background(), []byte("x"), "image/jpeg", liveVocabulary())
 
 	thinking, ok := f.body["thinking"].(map[string]any)

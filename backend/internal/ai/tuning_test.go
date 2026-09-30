@@ -24,10 +24,12 @@ func TestPlanForEachModelFamily(t *testing.T) {
 		// 5.5: `disabled` is a 400 on Opus 5.5 at every effort; Sonnet 5.5's
 		// lowest is between_tools.
 		{"opus 5.5 cannot turn thinking off", "claude-opus-5-5", tuning{effort: "low"}, "", "low", anthropicMaxTokensThinking},
-		{"sonnet 5.5 lowest", "claude-sonnet-5-5", tuning{effort: "low"}, "between_tools", "low", anthropicMaxTokens},
+		// Sonnet 5.5's measured best is adaptive; "least" still gets between_tools.
+		{"sonnet 5.5 auto is adaptive", "claude-sonnet-5-5", tuning{}, "adaptive", "", anthropicMaxTokensThinking},
+		{"sonnet 5.5 least", "claude-sonnet-5-5", tuning{effort: "low", thinking: "least"}, "between_tools", "low", anthropicMaxTokens},
 		{"sonnet 5.5 adaptive", "claude-sonnet-5-5", tuning{effort: "medium", thinking: "adaptive"}, "adaptive", "medium", anthropicMaxTokensThinking},
 		// Neither off setting is accepted at xhigh or max.
-		{"sonnet 5.5 at max", "claude-sonnet-5-5", tuning{effort: "max"}, "", "max", anthropicMaxTokensThinking},
+		{"sonnet 5.5 least at max", "claude-sonnet-5-5", tuning{effort: "max", thinking: "least"}, "", "max", anthropicMaxTokensThinking},
 		{"opus 5 at xhigh", "claude-opus-5", tuning{effort: "xhigh"}, "", "xhigh", anthropicMaxTokensThinking},
 		{"fable 5.1", "claude-fable-5-1", tuning{effort: "low"}, "", "low", anthropicMaxTokensThinking},
 		// Haiku 4.5 takes no effort and has no adaptive mode.
@@ -78,6 +80,9 @@ func TestValidateTuning(t *testing.T) {
 	if err := ValidateTuning("low", "adaptive"); err != nil {
 		t.Fatal(err)
 	}
+	if err := ValidateTuning("", "least"); err != nil {
+		t.Fatal(err)
+	}
 	if ValidateTuning("lowest", "") == nil || ValidateTuning("", "off") == nil {
 		t.Fatal("a typo must fail at startup, not on every photo")
 	}
@@ -93,7 +98,7 @@ func TestRequestCarriesEffortAndReportsUsage(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 
-	id, err := New("anthropic", srv.URL, "k", "claude-sonnet-5-5", WithEffort("low"))
+	id, err := New("anthropic", srv.URL, "k", "claude-sonnet-5-5", WithEffort("low"), WithThinking("least"))
 	if err != nil {
 		t.Fatal(err)
 	}
