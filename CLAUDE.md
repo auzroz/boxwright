@@ -46,6 +46,12 @@ app/        bare React Native (TypeScript), no Expo — capture, review, file
   ios/                  committed Xcode project; fastlane/ uploads to TestFlight
   src/connection.ts     server address + tokens, set in the app, Keychain-stored
   src/storage.ts        MMKV: the offline queue + read caches, synchronous
+  src/screens/          one file per screen; App.tsx owns the capture and routes
+  src/components/       item card, destination list, fill check, depth camera
+  src/ui/ src/theme/    Direction A ("Kraft") primitives and tokens; the accent
+                        is the only colour that can change (ThemeProvider)
+  src/draft.ts          the capture under review, pure, shared by the screens
+  assets/fonts/         Fraunces (SIL OFL) for titles, listed in UIAppFonts
   scripts/              check-ios-config.sh: asserts Info.plist + privacy manifest
 backend/    Go 1.23+, stdlib only (no external modules yet)
   cmd/server/           entrypoint
@@ -276,7 +282,8 @@ Environment:
   it); use the "Boxwright iPhone 17 Pro (27)" simulator, not a shared one.
   Taps must come from a subagent. The MCP's "device-interaction" skill does
   not exist in Claude Code; the subagent calls DeviceInteractionSynthesize
-  directly. A session expires during a long first build: build first, then
+  directly, in POINTS: tap `t x y`, swipe `t x1 y1 f x2 y2 0.4`. A few
+  invalid commands in a row end the session. A session expires during a long first build: build first, then
   start the session and install.
 - **Disk is the binding constraint.** A cold build plus a new simulator's
   first boot (it downloads ~1.2 GB of system assets) need 4-5 GB free; the
@@ -288,6 +295,10 @@ Environment:
   DerivedData, and the disk often has less than that free: delete it after.
 - Metro (`npm start`, bare React Native) listens on `*:8081`, every interface,
   so the Expo-era `--lan` workaround is gone. Run it detached like the backend.
+  JS `console.warn`/`error` go to the debugger only, not Metro's log or the
+  device log. To read them headless, connect to `webSocketDebuggerUrl` from
+  `GET :8081/json/list` WITH `Origin: http://localhost:8081` (without it, 401)
+  and send `Runtime.enable`; nothing is replayed, so attach before reproducing.
 - CocoaPods needs Homebrew's `ruby@3.3` (the system Ruby is 2.6): prefix
   `PATH=/opt/homebrew/opt/ruby@3.3/bin:$HOME/.gem/ruby/3.3.0/bin:$PATH
   GEM_HOME=$HOME/.gem/ruby/3.3.0` to `bundle exec pod install`. Xcode 27 rejects

@@ -114,6 +114,16 @@ export function isLocalHost(host: string): boolean {
   return !h.includes(".");
 }
 
+/**
+ * True for this phone itself. Plain http to it never leaves the device, so
+ * there is no network for a token to cross -- the Simulator talking to a
+ * backend on the same Mac is the everyday case.
+ */
+export function isLoopback(host: string): boolean {
+  const h = host.toLowerCase();
+  return h === "localhost" || h === "[::1]" || /^127(\.\d{1,3}){3}$/.test(h);
+}
+
 /** What to tell someone about how their token will travel. Empty when https. */
 export function transportWarnings(connection: Connection): string[] {
   const warnings: string[] = [];
@@ -122,6 +132,7 @@ export function transportWarnings(connection: Connection): string[] {
     ["Homebox", connection.homeboxUrl],
   ] as const) {
     if (!url.toLowerCase().startsWith("http://")) continue;
+    if (isLoopback(hostOf(url))) continue;
     if (!isLocalHost(hostOf(url))) {
       warnings.push(
         `iOS only allows plain http:// to local addresses (an IP address or a .local name). Use https:// for the ${label} — for example with \`tailscale serve\`.`,
