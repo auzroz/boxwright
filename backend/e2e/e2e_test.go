@@ -82,6 +82,14 @@ func TestEndToEnd(t *testing.T) {
 		if code := bw.do(t, "GET", "/api/v1/status", "", nil, nil, false); code != http.StatusUnauthorized {
 			t.Fatalf("status without the token: %d, want 401", code)
 		}
+		// The web UI syncs its theme to the user's settings. Set it the way
+		// the browser does, with the session, and read it back through the
+		// backend, which holds only the API key: that is the measurement of
+		// whether an API key can read settings at all.
+		if code := hb.call(t, "PUT", "/api/v1/users/self/settings", hb.session,
+			map[string]any{"theme": "forest"}, nil); code/100 != 2 {
+			t.Fatalf("set the theme: %d", code)
+		}
 		var st struct {
 			Version        string `json:"version"`
 			APIVersion     int    `json:"apiVersion"`
@@ -92,8 +100,12 @@ func TestEndToEnd(t *testing.T) {
 				OK    bool   `json:"ok"`
 				Error string `json:"error"`
 			} `json:"homebox"`
+			HomeboxTheme string `json:"homeboxTheme"`
 		}
 		bw.mustJSON(t, "GET", "/api/v1/status", nil, &st)
+		if st.HomeboxTheme != "forest" {
+			t.Errorf("homeboxTheme %q through the API key, want the forest the session set", st.HomeboxTheme)
+		}
 		if st.Version != "e2e" || st.APIVersion != 1 || !st.Identification || st.AIProvider != "openai" ||
 			st.ClientHomebox || !st.Homebox.OK {
 			t.Fatalf("status = %+v", st)

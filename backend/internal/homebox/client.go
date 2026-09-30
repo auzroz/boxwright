@@ -364,6 +364,38 @@ func (c *Client) ListEntityTypes(ctx context.Context) ([]EntityType, error) {
 	return out, nil
 }
 
+// DefaultTheme is the web UI's theme for a user who has never chosen one.
+const DefaultTheme = "homebox"
+
+// UserSettings is what Boxwright reads of the signed-in user's synced web-UI
+// preferences. Homebox stores them as a free-form object; only the theme is
+// modelled.
+type UserSettings struct {
+	// Theme is the web UI's theme name ("homebox", "forest", ...). A user who
+	// has never changed it has no entry at all, and the web UI then shows
+	// DefaultTheme, so that is what an absent or unreadable value reports.
+	Theme string
+}
+
+// SelfSettings returns the preferences of the user these credentials belong
+// to. The body is {"item": {...}}; a value of an unexpected type is treated as
+// absent rather than failing the call, because the object is written by the
+// web UI and anything could be in it.
+func (c *Client) SelfSettings(ctx context.Context) (UserSettings, error) {
+	var out struct {
+		Item map[string]json.RawMessage `json:"item"`
+	}
+	if err := c.do(ctx, http.MethodGet, "/v1/users/self/settings", nil, &out); err != nil {
+		return UserSettings{}, fmt.Errorf("homebox user settings: %w", err)
+	}
+	settings := UserSettings{Theme: DefaultTheme}
+	var theme string
+	if raw, ok := out.Item["theme"]; ok && json.Unmarshal(raw, &theme) == nil && strings.TrimSpace(theme) != "" {
+		settings.Theme = strings.TrimSpace(theme)
+	}
+	return settings, nil
+}
+
 // LocationEntityTypeID returns the id of an entity type whose isLocation is
 // true. Creating a location REQUIRES one: with entityTypeId omitted the server
 // auto-resolves the group's default type, which is a non-location type, and
