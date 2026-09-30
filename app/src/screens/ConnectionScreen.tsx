@@ -28,6 +28,12 @@ import { Header, Screen } from "../ui/Screen";
 export function ConnectionScreen(props: {
   /** True on a fresh install: there is nowhere to go back to. */
   firstRun: boolean;
+  /**
+   * Inside first-run setup: numbered, with a way back to the welcome screen,
+   * and Continue offered only once a test has passed -- every step after this
+   * one reads from the server.
+   */
+  setup?: { onBack: () => void; step: { index: number; count: number } };
   /** `moved` is true when the save pointed the app at a different inventory. */
   onDone: (moved: boolean) => void;
 }) {
@@ -100,20 +106,40 @@ export function ConnectionScreen(props: {
   return (
     <Screen
       footer={
-        <>
-          <Button label="Test connection" kind="secondary" busy={busy === "test"} disabled={busy !== ""} onPress={() => void test()} />
-          <Button label={props.firstRun ? "Save and continue" : "Save"} busy={busy === "save"} disabled={busy !== ""} onPress={() => void save()} />
-        </>
+        props.setup && !result?.ok ? (
+          <Button label="Test connection" busy={busy === "test"} disabled={busy !== ""} onPress={() => void test()} />
+        ) : (
+          <>
+            <Button label="Test connection" kind="secondary" busy={busy === "test"} disabled={busy !== ""} onPress={() => void test()} />
+            <Button
+              label={props.setup ? "Continue" : props.firstRun ? "Save and continue" : "Save"}
+              busy={busy === "save"}
+              disabled={busy !== ""}
+              onPress={() => void save()}
+            />
+          </>
+        )
       }
     >
       <Header
-        back={props.firstRun ? null : { label: "Cancel", onPress: () => props.onDone(false), disabled: busy !== "" }}
-        title={props.firstRun ? "Connect to your server" : "Settings"}
-        subtitle="Boxwright runs beside your Homebox, on your own hardware. Enter the address and access token it was set up with (BOXWRIGHT_API_TOKEN)."
+        back={
+          props.setup
+            ? { label: "Welcome", onPress: props.setup.onBack, disabled: busy !== "" }
+            : props.firstRun
+              ? null
+              : { label: "Cancel", onPress: () => props.onDone(false), disabled: busy !== "" }
+        }
+        step={props.setup?.step}
+        title={props.setup ? "Connect your server" : props.firstRun ? "Connect to your server" : "Settings"}
+        subtitle={
+          props.setup
+            ? "The address and access token your Boxwright server was set up with (BOXWRIGHT_API_TOKEN)."
+            : "Boxwright runs beside your Homebox, on your own hardware. Enter the address and access token it was set up with (BOXWRIGHT_API_TOKEN)."
+        }
       />
 
-      {!props.firstRun && <ThisPhone />}
-      {!props.firstRun && <Text style={type.section}>SERVER</Text>}
+      {!props.firstRun && !props.setup && <ThisPhone />}
+      {!props.firstRun && !props.setup && <Text style={type.section}>SERVER</Text>}
       <TextField
         label="Server address"
         value={draft.apiUrl}
@@ -131,8 +157,10 @@ export function ConnectionScreen(props: {
         error={errors.apiToken}
         secret
         literal
-        // Keeps iOS from offering to save a server token as a website password.
-        textContentType="none"
+        // iOS offers to save any secure field as a website password -- a
+        // "Save Password?" sheet over the next screen -- unless it is marked
+        // as a one-time code. "none" is not enough; it still asked.
+        textContentType="oneTimeCode"
         onChange={(apiToken) => edit({ apiToken })}
       />
       {queue.entries.length > 0 && (
@@ -175,7 +203,7 @@ export function ConnectionScreen(props: {
             error={errors.homeboxToken}
             secret
             literal
-            textContentType="none"
+            textContentType="oneTimeCode"
             onChange={(homeboxToken) => edit({ homeboxToken })}
           />
         </>

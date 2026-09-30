@@ -32,7 +32,12 @@ const ACCESS = [
  * shipped. Everything is optional except a capacity for a new type, and only
  * what is filled in is written -- nothing else about a container is touched.
  */
-export function ContainersScreen(props: { onDone: () => void; backLabel?: string }) {
+export function ContainersScreen(props: {
+  onDone: () => void;
+  backLabel?: string;
+  /** Inside first-run setup: numbered, skippable, and Continue once anything is recorded. */
+  setup?: { onBack: () => void; step: { index: number; count: number } };
+}) {
   const system = useUnits();
   const [boxes, setBoxes] = useState<Box[] | null>(null);
   const [types, setTypes] = useState<ContainerType[]>([]);
@@ -47,6 +52,8 @@ export function ContainersScreen(props: { onDone: () => void; backLabel?: string
   const [interiorText, setInteriorText] = useState("");
   const [access, setAccess] = useState<Access | undefined>(undefined);
   const [fill, setFill] = useState<number | undefined>(undefined);
+  /** Something was written this visit; in setup that turns Skip into Continue. */
+  const [recorded, setRecorded] = useState(false);
 
   const load = async () => {
     setError("");
@@ -117,7 +124,10 @@ export function ContainersScreen(props: { onDone: () => void; backLabel?: string
       if (failed.length > 0) {
         setError(`${failed.length} of ${ids.length} could not be saved: ${failed[0]?.error ?? "unknown error"}`);
       }
-      if (saved > 0) setNote(`Recorded on ${saved} ${plural(saved, "container", "containers")}.`);
+      if (saved > 0) {
+        setNote(`Recorded on ${saved} ${plural(saved, "container", "containers")}.`);
+        setRecorded(true);
+      }
       setSelected({});
       setFill(undefined);
       await load();
@@ -129,7 +139,11 @@ export function ContainersScreen(props: { onDone: () => void; backLabel?: string
   }
 
   const sheet =
-    ids.length === 0 ? undefined : (
+    ids.length === 0 ? (
+      props.setup ? (
+        <Button label={recorded ? "Continue" : "Skip for now"} kind={recorded ? "primary" : "secondary"} onPress={props.onDone} />
+      ) : undefined
+    ) : (
       <ScrollView style={styles.sheet} contentContainerStyle={styles.sheetBody} keyboardShouldPersistTaps="handled">
         <View style={styles.sheetHead}>
           <Text style={[type.title, styles.grow]}>
@@ -199,11 +213,16 @@ export function ContainersScreen(props: { onDone: () => void; backLabel?: string
     );
 
   return (
-    <Screen footer={sheet} sheet>
+    <Screen footer={sheet} sheet={ids.length > 0}>
       <Header
-        back={{ label: props.backLabel ?? "Locations", onPress: props.onDone, disabled: busy }}
-        title="Container sizes"
-        subtitle="Tick the ones that are the same, then say what they are. Boxwright uses the size to tell when something won’t fit, and never guesses one you haven’t given."
+        back={{ label: props.backLabel ?? "Locations", onPress: props.setup?.onBack ?? props.onDone, disabled: busy }}
+        step={props.setup?.step}
+        title={props.setup ? "What kind of containers?" : "Container sizes"}
+        subtitle={
+          props.setup
+            ? "Tick the ones that are the same, then say what they are. With sizes, Boxwright knows when something won’t fit. Skip it and it works without them."
+            : "Tick the ones that are the same, then say what they are. Boxwright uses the size to tell when something won’t fit, and never guesses one you haven’t given."
+        }
       />
       {boxes === null && <ActivityIndicator />}
       {ids.length === 0 && error !== "" && <Notice tone="warn">{error}</Notice>}
@@ -235,7 +254,7 @@ export function ContainersScreen(props: { onDone: () => void; backLabel?: string
                       {b.name}
                     </Text>
                     <Text style={type.caption} numberOfLines={1}>
-                      {kind.length > 0 ? kind.join(" · ") : "Size not recorded"}
+                      {kind.length > 0 ? kind.join(" · ") : "No size yet"}
                     </Text>
                   </View>
                   <FillBar box={b} thin />

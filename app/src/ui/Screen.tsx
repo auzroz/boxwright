@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import type { ReactNode, Ref } from "react";
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../theme/ThemeProvider";
@@ -11,8 +12,9 @@ import { Icon } from "./Icon";
  * stays put above the home indicator -- where the action that ends the screen
  * lives, so it is never scrolled out of reach.
  *
- * The keyboard pushes the footer up rather than covering it. A form whose
- * Save sits under the keyboard was found on a real phone, twice.
+ * While the keyboard is up the footer steps aside: raised above the keyboard
+ * it took most of what was left, hiding the very field being typed in and the
+ * result of testing it. It comes back when typing ends.
  */
 export function Screen(props: {
   children: ReactNode;
@@ -24,6 +26,7 @@ export function Screen(props: {
   scrollRef?: Ref<ScrollView>;
 }) {
   const insets = useSafeAreaInsets();
+  const typing = useKeyboardShown();
   const top = insets.top + space.sm;
   const bottom = props.footer ? space.xxl : insets.bottom + space.xxl;
   return (
@@ -42,7 +45,7 @@ export function Screen(props: {
       )}
       {/* Scrolled content passes under the status bar; this keeps the clock on paper. */}
       <View style={[styles.statusBar, { height: insets.top }]} pointerEvents="none" />
-      {props.footer ? (
+      {props.footer && !typing ? (
         <View style={[styles.footer, props.sheet && styles.sheet, { paddingBottom: Math.max(insets.bottom, space.lg) }]}>
           {props.footer}
         </View>
@@ -61,9 +64,12 @@ export function Header(props: {
   subtitle?: string;
   back?: { label: string; onPress: () => void; disabled?: boolean } | null;
   right?: ReactNode;
+  /** "Step 2 of 4", drawn as a bar, for a screen inside first-run setup. */
+  step?: { index: number; count: number };
 }) {
   const { accent } = useTheme();
   const back = props.back;
+  const step = props.step;
   return (
     <View style={styles.header}>
       {back ? (
@@ -80,6 +86,18 @@ export function Header(props: {
           <Text style={[styles.backText, { color: accent }, back.disabled && styles.disabled]}>{back.label}</Text>
         </Pressable>
       ) : null}
+      {step ? (
+        <View style={styles.progress} accessible accessibilityLabel={`Step ${step.index} of ${step.count}`}>
+          <View style={styles.progressBar}>
+            {Array.from({ length: step.count }, (_, i) => (
+              <View key={i} style={[styles.progressPart, { backgroundColor: i < step.index ? accent : palette.line }]} />
+            ))}
+          </View>
+          <Text style={type.caption}>
+            Step {step.index} of {step.count}
+          </Text>
+        </View>
+      ) : null}
       <View style={styles.titleRow}>
         <Text style={[type.display, styles.title]} accessibilityRole="header">
           {props.title}
@@ -91,9 +109,22 @@ export function Header(props: {
   );
 }
 
+function useKeyboardShown(): boolean {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardWillShow", () => setShown(true));
+    const hide = Keyboard.addListener("keyboardWillHide", () => setShown(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return shown;
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.ground },
-  statusBar: { position: "absolute", top: 0, left: 0, right: 0, backgroundColor: palette.ground, opacity: 0.96 },
+  statusBar: { position: "absolute", top: 0, left: 0, right: 0, backgroundColor: palette.ground },
   body: { paddingHorizontal: space.xl, gap: space.lg },
   fixed: { flex: 1 },
   footer: {
@@ -118,6 +149,9 @@ const styles = StyleSheet.create({
   back: { alignSelf: "flex-start", minHeight: MIN_TARGET, flexDirection: "row", alignItems: "center", gap: 2 },
   backText: { fontSize: 17 },
   disabled: { opacity: 0.4 },
+  progress: { gap: space.sm, marginBottom: space.sm },
+  progressBar: { flexDirection: "row", gap: 6 },
+  progressPart: { flex: 1, height: 4, borderRadius: 2 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   title: { flex: 1 },
 });
