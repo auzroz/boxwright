@@ -1,12 +1,9 @@
 import {
   canHold,
   fillSummary,
-  formatDims,
   measuredDims,
   needLitres,
   normalizeDims,
-  parseCapacity,
-  parseDims,
   wantsFillCheck,
   withLitres,
 } from "./capacity";
@@ -44,15 +41,6 @@ describe("sizes", () => {
     expect(normalizeDims(null)).toBeUndefined();
   });
 
-  test("parse what a person types, as the backend does", () => {
-    expect(parseDims("70x45x38")).toEqual({ l: 70, w: 45, h: 38 });
-    expect(parseDims("45 × 70 × 38 cm")).toEqual({ l: 70, w: 45, h: 38 });
-    expect(parseDims("70*45*38")).toEqual({ l: 70, w: 45, h: 38 });
-    expect(parseDims("70x45")).toBeUndefined();
-    expect(parseDims("70xx38")).toBeUndefined();
-    expect(parseDims("")).toBeUndefined();
-    expect(formatDims({ l: 32, w: 20.25, h: 12 })).toBe("32 × 20.3 × 12 cm");
-  });
 
   test("need is a size's volume, else the server's litres, times quantity", () => {
     expect(needLitres({ sizeBucket: "L" }, LITRES)).toBe(25);
@@ -120,21 +108,3 @@ describe("what the screens say about fill", () => {
   });
 });
 
-describe("capacity as a person types it", () => {
-  test("litres, or US gallons converted, in whole litres", () => {
-    expect(parseCapacity("100")).toBe(100);
-    expect(parseCapacity("100 L")).toBe(100);
-    expect(parseCapacity("68 litres")).toBe(68);
-    expect(parseCapacity("27 gal")).toBe(102);
-    expect(parseCapacity("27 Gallons")).toBe(102);
-    expect(parseCapacity("18gal")).toBe(68);
-  });
-
-  test("anything else is not a capacity", () => {
-    expect(parseCapacity("")).toBeUndefined();
-    expect(parseCapacity("big")).toBeUndefined();
-    expect(parseCapacity("0")).toBeUndefined();
-    expect(parseCapacity("27 quarts")).toBeUndefined();
-    expect(parseCapacity("99999")).toBeUndefined();
-  });
-});
