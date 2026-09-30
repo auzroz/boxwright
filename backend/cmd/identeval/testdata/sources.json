@@ -1,0 +1,225 @@
+{
+  "about": "Wikimedia Commons photos for cmd/identeval, fetched at 1024 px (the size the app sends) and verified by sha256. Nothing here is committed as an image: the harness downloads each into its cache. Licences and authors are Commons' own metadata; credit is due as listed.",
+  "photos": [
+    {
+      "id": "drill-screw",
+      "title": "File:Cordless electric (screw) drill.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Cordless_electric_(screw)_drill.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Cordless_electric_%28screw%29_drill.jpg/1280px-Cordless_electric_%28screw%29_drill.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "2cf7147350a65182ab1c47fead829e151cbca0fd800a67664f13cb7d9359d809",
+      "bytes": 659267,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Fructibus"
+    },
+    {
+      "id": "mason-jar-family",
+      "title": "File:Mason jar family.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Mason_jar_family.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Mason_jar_family.jpg/1280px-Mason_jar_family.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "2c1090615b2b3230b889637ec9e92ce25173e18de637cf6f684b82ea40bac1b2",
+      "bytes": 430811,
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Dvortygirl"
+    },
+    {
+      "id": "mason-jar-single",
+      "title": "File:Mason Jar with Screw Top.JPG",
+      "page": "https://commons.wikimedia.org/wiki/File:Mason_Jar_with_Screw_Top.JPG",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Mason_Jar_with_Screw_Top.JPG/1280px-Mason_Jar_with_Screw_Top.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "050da44de2c30736aa216f07acf53245375ba45d5ab66a35e1a58645d5ed5dfc",
+      "bytes": 379664,
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Dwight Burdette"
+    },
+    {
+      "id": "toolbox",
+      "title": "File:Toolbox (49985663631).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Toolbox_(49985663631).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Toolbox_%2849985663631%29.jpg/1280px-Toolbox_%2849985663631%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "1021113f5baec0de73c3b3cdc7bf912114b312ca0894dd68143e8bfe63e89cd2",
+      "bytes": 295594,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Jim Griffin"
+    },
+    {
+      "id": "tangled-lights",
+      "title": "File:Holiday Classic - Tangled Lights (3047951705).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Holiday_Classic_-_Tangled_Lights_(3047951705).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Holiday_Classic_-_Tangled_Lights_%283047951705%29.jpg/1280px-Holiday_Classic_-_Tangled_Lights_%283047951705%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "011967e994599dde808a0e313e1a20dddb07359d893d84c31eafb7d8220de24d",
+      "bytes": 468217,
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "frankieleon"
+    },
+    {
+      "id": "kitchen-drawer",
+      "title": "File:Kitchen drawer (Unsplash).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Kitchen_drawer_(Unsplash).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Kitchen_drawer_%28Unsplash%29.jpg/1280px-Kitchen_drawer_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "78b1f93df87346b55e72503df8ba672cf327952eeaf33d5e298548b145d3bf57",
+      "bytes": 156521,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Jarosław Ceborski jarson"
+    },
+    {
+      "id": "old-books",
+      "title": "File:Old Books 01.JPG",
+      "page": "https://commons.wikimedia.org/wiki/File:Old_Books_01.JPG",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Old_Books_01.JPG/1280px-Old_Books_01.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "231c0af5114125f2958a41094207f693ef28592457bf99f5953c9fcddce02213",
+      "bytes": 390810,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Ch. Maderthoner"
+    },
+    {
+      "id": "books-multicolor",
+      "title": "File:Stack of multicolored books on a table.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Stack_of_multicolored_books_on_a_table.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Stack_of_multicolored_books_on_a_table.jpg/1280px-Stack_of_multicolored_books_on_a_table.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "f585c098e860e1e75202a35d6255b527f098e5bac2748b5d2487d8fb5b35e6d0",
+      "bytes": 358028,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Alexander Grey"
+    },
+    {
+      "id": "pantry-shelf",
+      "title": "File:Pantry shelf (Unsplash).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Pantry_shelf_(Unsplash).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Pantry_shelf_%28Unsplash%29.jpg/1280px-Pantry_shelf_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "7656d75ad7771c0fff911405accdd229d99b0a014b5533561de151af343d12c7",
+      "bytes": 243160,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Chris Lawton chrislawton"
+    },
+    {
+      "id": "messy-desk",
+      "title": "File:Messy desk.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Messy_desk.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Messy_desk.jpg/1280px-Messy_desk.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "99e5c9ddfad9aefa500bf8c3d7c98b2cc8ae0d820de8e704a2d6b73cfb21ff20",
+      "bytes": 252196,
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Sugar Pond"
+    },
+    {
+      "id": "hand-tool-set",
+      "title": "File:Hand-tool set with bits and accessories arranged on a white surface..jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Hand-tool_set_with_bits_and_accessories_arranged_on_a_white_surface..jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Hand-tool_set_with_bits_and_accessories_arranged_on_a_white_surface..jpg/1280px-Hand-tool_set_with_bits_and_accessories_arranged_on_a_white_surface..jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "7543925015d0448c0a2264f0343a63d35caf7aeb28d5b8add227aab53a0a0311",
+      "bytes": 239563,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Wilfredor"
+    },
+    {
+      "id": "sewing-supplies",
+      "title": "File:Sewing Supplies (Unsplash).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Sewing_Supplies_(Unsplash).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Sewing_Supplies_%28Unsplash%29.jpg/1280px-Sewing_Supplies_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "ddab367f365bc6f576e5ba11467ff318a2ee27fe10651d1403f5b218e1878761",
+      "bytes": 489319,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Igor Ovsyannykov igorovsyannykov"
+    },
+    {
+      "id": "paint-cans",
+      "title": "File:Paint cans.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Paint_cans.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Paint_cans.jpg/1280px-Paint_cans.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "b6f7f585a06c344e2b268af25ce8c575849f8dbe9d8754027ee261c2878284f4",
+      "bytes": 265947,
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Rpperini"
+    },
+    {
+      "id": "lawn-mower",
+      "title": "File:Toro 22 Inch Recycler Walk Behind Lawn Mower.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Toro_22_Inch_Recycler_Walk_Behind_Lawn_Mower.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Toro_22_Inch_Recycler_Walk_Behind_Lawn_Mower.jpg/1280px-Toro_22_Inch_Recycler_Walk_Behind_Lawn_Mower.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "ddd8b00eb8402d0f2a9061c9157b4dfe561a0e475c15621e8e142db823ca8811",
+      "bytes": 964160,
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Garylittlewood"
+    },
+    {
+      "id": "usb-charger",
+      "title": "File:Multi-USB and charger.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Multi-USB_and_charger.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Multi-USB_and_charger.jpg/1280px-Multi-USB_and_charger.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "03af86a3219df4df932f99dcfb4fad76f4e6e1cd5fc333ebbe36b389aff2bf4f",
+      "bytes": 318225,
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "SD hehua"
+    },
+    {
+      "id": "first-aid-kit",
+      "title": "File:First Aid Kit for Immediate Emergency Response 01.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:First_Aid_Kit_for_Immediate_Emergency_Response_01.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/First_Aid_Kit_for_Immediate_Emergency_Response_01.jpg/1280px-First_Aid_Kit_for_Immediate_Emergency_Response_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "b38ff925b9a1c887132e5b8194c920e7a4da82e7de659a074d7ccb88f24650d7",
+      "bytes": 275499,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "ABORISADEADETONA"
+    },
+    {
+      "id": "flashlight",
+      "title": "File:Fenix P1D LED flashlight (2739718566).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Fenix_P1D_LED_flashlight_(2739718566).jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/32/Fenix_P1D_LED_flashlight_%282739718566%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "sha256": "70854629d0585cf01054985ad90ea1a856ac7930ef8da6c3b808c29c695728cf",
+      "bytes": 340659,
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Darron Birgenheier from Reno, NV, USA"
+    },
+    {
+      "id": "cable-reel",
+      "title": "File:Cable reel extension cord.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Cable_reel_extension_cord.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Cable_reel_extension_cord.jpg/1280px-Cable_reel_extension_cord.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "28bdc624706863399eb819d4a5624e244f2580f5297b2d18be76ec6ef0452976",
+      "bytes": 576077,
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Fumikas Sagisavas"
+    },
+    {
+      "id": "board-game",
+      "title": "File:Just One party game box, rules, cards, and pieces 01.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Just_One_party_game_box,_rules,_cards,_and_pieces_01.jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Just_One_party_game_box%2C_rules%2C_cards%2C_and_pieces_01.jpg/1280px-Just_One_party_game_box%2C_rules%2C_cards%2C_and_pieces_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "18d367f46cf7a099ebdeff4277eeb258651a87347a14b8030f5b8124733cf2ab",
+      "bytes": 367446,
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Harrison Keely"
+    },
+    {
+      "id": "tape-and-books",
+      "title": "File:Measuring tape next to a stack of books on a wooden table. (51145551839).jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Measuring_tape_next_to_a_stack_of_books_on_a_wooden_table._(51145551839).jpg",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Measuring_tape_next_to_a_stack_of_books_on_a_wooden_table._%2851145551839%29.jpg/1280px-Measuring_tape_next_to_a_stack_of_books_on_a_wooden_table._%2851145551839%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sha256": "cb1bffc2ae7d1c4241cd03ae516238b0be7fa8852209d74ab977b896fb31d71d",
+      "bytes": 279838,
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Nenad Stojkovic"
+    }
+  ]
+}

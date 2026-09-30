@@ -46,6 +46,10 @@ Done, with the evidence:
 | TestFlight upload from the maintainer's Mac, no build service | `app/ios/fastlane/Fastfile` |
 | Choose a photo from the library (system picker, no permission) | `App.tsx` |
 | Kubernetes example | `deploy/kubernetes/boxwright.yaml` |
+| Direction A redesign, first-run setup, Homebox colours | `app/src/screens/`, `src/setup.ts`, `src/theme/homebox.ts` |
+| In-app demo for App Review (no server, nothing sent) | `app/src/demo/`; review notes under decision 3 |
+| Depth camera failures fall back to the system camera or answering by hand | `app/src/depthFallback.ts` |
+| Vision model chosen by measurement, repeatable | `make identeval`; [IDENTIFICATION.md](IDENTIFICATION.md) (Sonnet 5.5, 2026-09-30) |
 
 The server-address change was the one hard blocker for any iOS build that
 leaves the developer's machine. Until then the address and token were

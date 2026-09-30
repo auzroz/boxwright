@@ -45,7 +45,8 @@ func run(log *slog.Logger) error {
 			"for a single-user deployment.")
 	}
 
-	identifier, err := ai.New(cfg.AIProvider, cfg.AIBaseURL, cfg.AIAPIKey, cfg.AIModel)
+	identifier, err := ai.New(cfg.AIProvider, cfg.AIBaseURL, cfg.AIAPIKey, cfg.AIModel,
+		ai.WithEffort(cfg.AIEffort), ai.WithThinking(cfg.AIThinking))
 	if err != nil {
 		return err
 	}

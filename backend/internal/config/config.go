@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"time"
+
+	"boxwright/internal/ai"
 )
 
 // Config holds all runtime configuration. See README.md for the reference table.
@@ -51,6 +53,11 @@ type Config struct {
 	AIBaseURL  string
 	AIAPIKey   string
 	AIModel    string
+	// AIEffort and AIThinking tune how the model is asked, where it takes
+	// them (Anthropic): effort low..max, thinking auto|adaptive. Empty keeps
+	// the defaults, which cmd/identeval is for choosing.
+	AIEffort   string
+	AIThinking string
 
 	BoxCacheTTL time.Duration
 }
@@ -69,6 +76,11 @@ func Load() (Config, error) {
 		AIBaseURL:      os.Getenv("AI_BASE_URL"),
 		AIAPIKey:       os.Getenv("AI_API_KEY"),
 		AIModel:        os.Getenv("AI_MODEL"),
+		AIEffort:       os.Getenv("AI_EFFORT"),
+		AIThinking:     os.Getenv("AI_THINKING"),
+	}
+	if err := ai.ValidateTuning(c.AIEffort, c.AIThinking); err != nil {
+		return c, fmt.Errorf("AI_EFFORT / AI_THINKING: %w", err)
 	}
 
 	allow := getenv("ALLOW_CLIENT_HOMEBOX", "false")

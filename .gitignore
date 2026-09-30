@@ -8,3 +8,7 @@ app/.env
 
 # Scratch git worktrees used by parallel agent runs.
 .claude/worktrees/
+
+# The identification eval: built binary and raw results (summaries worth keeping go in docs/IDENTIFICATION.md).
+backend/bin/
+backend/cmd/identeval/results/

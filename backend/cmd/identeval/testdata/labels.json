@@ -1,0 +1,187 @@
+{
+  "version": 2,
+  "about": "Ground truth for backend/cmd/identeval. Drafted by eye from each photo; lenient on purpose. An expected item matches a returned item when any `match` keyword is a substring of its name (case-insensitive). `must` items count toward recall; the others only stop a correct answer being counted as a false positive. `categories` lists every acceptable category key. `quantity` is [min, max] summed over every returned item that matches. `longestCm` is [min, max] for the longest side, where the real object's size is known; omitted otherwise. `bulky` true means it belongs on a floor, not in a container.",
+  "categories": ["tools", "hardware", "kitchen", "decor", "electronics", "books-media", "outdoor", "garden", "crafts", "office", "household", "first-aid", "games", "paint", "toiletries", "food"],
+  "photos": [
+    {
+      "id": "drill-screw", "kind": "single",
+      "items": [
+        { "name": "cordless drill", "match": ["drill"], "categories": ["tools"], "quantity": [1, 1], "must": true, "bulky": false, "longestCm": [20, 35] }
+      ]
+    },
+    {
+      "id": "mason-jar-family", "kind": "repeated",
+      "items": [
+        { "name": "glass mason jars", "match": ["jar"], "categories": ["kitchen", "household"], "quantity": [5, 7], "must": true, "fragile": true }
+      ]
+    },
+    {
+      "id": "mason-jar-single", "kind": "single",
+      "items": [
+        { "name": "mason jar with lid", "match": ["jar"], "categories": ["kitchen", "household"], "quantity": [1, 1], "must": true, "fragile": true, "longestCm": [14, 22] }
+      ]
+    },
+    {
+      "id": "toolbox", "kind": "multi",
+      "items": [
+        { "name": "wooden tool tote", "match": ["tool box", "toolbox", "tote", "carrier", "caddy", "tool box"], "categories": ["tools", "hardware"], "quantity": [1, 1], "must": true },
+        { "name": "spokeshave", "match": ["spokeshave", "drawknife", "draw knife", "plane", "shave"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "chisel", "match": ["chisel"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "screws", "match": ["screw"], "categories": ["hardware", "tools"], "quantity": [1, 20], "must": false },
+        { "name": "metal bracket", "match": ["bracket", "plate", "hinge"], "categories": ["hardware", "tools"], "quantity": [1, 3], "must": false }
+      ]
+    },
+    {
+      "id": "tangled-lights", "kind": "awkward",
+      "items": [
+        { "name": "string of holiday lights", "match": ["light"], "categories": ["decor", "electronics", "household"], "quantity": [1, 3], "must": true, "fragile": true }
+      ]
+    },
+    {
+      "id": "kitchen-drawer", "kind": "multi",
+      "items": [
+        { "name": "spoons", "match": ["spoon", "cutlery", "flatware", "silverware"], "categories": ["kitchen"], "quantity": [6, 12], "must": true },
+        { "name": "forks", "match": ["fork", "cutlery", "flatware", "silverware"], "categories": ["kitchen"], "quantity": [2, 5], "must": true },
+        { "name": "table knife", "match": ["knife", "knives", "cutlery", "flatware", "silverware"], "categories": ["kitchen"], "quantity": [1, 2], "must": false },
+        { "name": "drawer organizer", "match": ["organizer", "organiser", "tray", "insert", "divider"], "categories": ["kitchen", "household"], "quantity": [1, 2], "must": false }
+      ]
+    },
+    {
+      "id": "old-books", "kind": "repeated",
+      "items": [
+        { "name": "antique hardcover books", "match": ["book"], "categories": ["books-media"], "quantity": [4, 4], "must": true }
+      ]
+    },
+    {
+      "id": "books-multicolor", "kind": "repeated",
+      "items": [
+        { "name": "stack of books", "match": ["book"], "categories": ["books-media"], "quantity": [12, 25], "must": true }
+      ]
+    },
+    {
+      "id": "pantry-shelf", "kind": "dense",
+      "items": [
+        { "name": "Marmite jars", "match": ["marmite", "yeast extract", "spread"], "categories": ["food", "kitchen"], "quantity": [6, 9], "must": true, "fragile": true },
+        { "name": "golden syrup tin", "match": ["syrup", "treacle", "lyle", "tin"], "categories": ["food", "kitchen"], "quantity": [1, 1], "must": true },
+        { "name": "hot sauce bottle", "match": ["tabasco", "hot sauce", "sauce"], "categories": ["food", "kitchen"], "quantity": [1, 2], "must": true },
+        { "name": "glass storage jars", "match": ["jar", "canister"], "categories": ["kitchen", "household"], "quantity": [1, 4], "must": false },
+        { "name": "bottles", "match": ["bottle", "decanter", "wine"], "categories": ["kitchen", "household", "food"], "quantity": [1, 6], "must": false },
+        { "name": "fruit", "match": ["apple", "banana", "lemon", "fruit", "ginger"], "categories": ["food", "kitchen"], "quantity": [1, 12], "must": false },
+        { "name": "candles", "match": ["candle"], "categories": ["household", "decor"], "quantity": [1, 3], "must": false },
+        { "name": "pitcher", "match": ["pitcher", "jug"], "categories": ["kitchen", "household"], "quantity": [1, 1], "must": false },
+        { "name": "clock", "match": ["clock"], "categories": ["decor", "household"], "quantity": [1, 3], "must": false },
+        { "name": "bowl", "match": ["bowl", "dish", "plate", "stand"], "categories": ["kitchen", "household"], "quantity": [1, 3], "must": false },
+        { "name": "framed picture", "match": ["frame", "picture", "print", "sign"], "categories": ["decor"], "quantity": [1, 3], "must": false }
+      ]
+    },
+    {
+      "id": "messy-desk", "kind": "dense",
+      "items": [
+        { "name": "computer monitor", "match": ["monitor", "screen", "display"], "categories": ["electronics", "office"], "quantity": [1, 1], "must": true, "fragile": true },
+        { "name": "headphones", "match": ["headphone", "headset"], "categories": ["electronics"], "quantity": [1, 1], "must": true },
+        { "name": "radio", "match": ["radio"], "categories": ["electronics"], "quantity": [1, 1], "must": true },
+        { "name": "tape dispenser", "match": ["tape"], "categories": ["office"], "quantity": [1, 1], "must": true },
+        { "name": "stapler", "match": ["stapler"], "categories": ["office"], "quantity": [1, 1], "must": true },
+        { "name": "lotion bottles", "match": ["lotion", "cetaphil", "cleanser", "moisturiz", "bottle", "pump"], "categories": ["toiletries", "household"], "quantity": [1, 3], "must": true },
+        { "name": "legal pads", "match": ["pad", "notepad", "notebook", "paper"], "categories": ["office"], "quantity": [1, 4], "must": false },
+        { "name": "file folders", "match": ["folder", "file", "document"], "categories": ["office"], "quantity": [1, 10], "must": false },
+        { "name": "paper cup", "match": ["cup"], "categories": ["kitchen", "household"], "quantity": [1, 2], "must": false },
+        { "name": "glass bottle", "match": ["bottle", "jug"], "categories": ["household", "kitchen"], "quantity": [1, 2], "must": false },
+        { "name": "pen holder", "match": ["pen", "holder", "mug", "utensil"], "categories": ["office"], "quantity": [1, 2], "must": false },
+        { "name": "twine", "match": ["twine", "string", "yarn"], "categories": ["crafts", "office"], "quantity": [1, 1], "must": false },
+        { "name": "speaker", "match": ["speaker"], "categories": ["electronics"], "quantity": [1, 1], "must": false },
+        { "name": "phone", "match": ["phone", "cord"], "categories": ["electronics"], "quantity": [1, 1], "must": false },
+        { "name": "pill bottle", "match": ["pill", "vitamin", "medicine"], "categories": ["first-aid", "toiletries"], "quantity": [1, 1], "must": false },
+        { "name": "magazine", "match": ["magazine", "newspaper"], "categories": ["books-media"], "quantity": [1, 3], "must": false }
+      ]
+    },
+    {
+      "id": "hand-tool-set", "kind": "dense",
+      "items": [
+        { "name": "combination wrenches", "match": ["wrench", "spanner"], "categories": ["tools"], "quantity": [6, 9], "must": true },
+        { "name": "claw hammer", "match": ["hammer"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "pliers", "match": ["plier"], "categories": ["tools"], "quantity": [2, 4], "must": true },
+        { "name": "screwdrivers", "match": ["screwdriver"], "categories": ["tools"], "quantity": [3, 6], "must": true },
+        { "name": "spirit level", "match": ["level"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "tape measure", "match": ["tape measure", "measuring tape", "measure"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "utility knife", "match": ["knife", "cutter"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "spring clamps", "match": ["clamp"], "categories": ["tools"], "quantity": [2, 2], "must": true },
+        { "name": "ratchet", "match": ["ratchet", "socket wrench"], "categories": ["tools"], "quantity": [1, 1], "must": true },
+        { "name": "adjustable wrench", "match": ["adjustable", "wrench"], "categories": ["tools"], "quantity": [1, 1], "must": false },
+        { "name": "wire stripper", "match": ["stripper", "crimper", "wire cutter"], "categories": ["tools"], "quantity": [1, 1], "must": false },
+        { "name": "screwdriver bits", "match": ["bit"], "categories": ["tools", "hardware"], "quantity": [1, 100], "must": false },
+        { "name": "drill bits", "match": ["drill bit", "bit"], "categories": ["tools", "hardware"], "quantity": [1, 40], "must": false },
+        { "name": "electrical tape", "match": ["tape"], "categories": ["tools", "hardware", "electronics"], "quantity": [1, 1], "must": false },
+        { "name": "hex keys", "match": ["hex", "allen"], "categories": ["tools"], "quantity": [1, 3], "must": false },
+        { "name": "socket and extension", "match": ["socket", "extension"], "categories": ["tools"], "quantity": [1, 3], "must": false }
+      ]
+    },
+    {
+      "id": "sewing-supplies", "kind": "multi",
+      "items": [
+        { "name": "thread spools", "match": ["thread", "spool", "bobbin", "yarn"], "categories": ["crafts"], "quantity": [8, 16], "must": true },
+        { "name": "scissors", "match": ["scissor", "shears"], "categories": ["crafts", "office", "tools"], "quantity": [1, 1], "must": true },
+        { "name": "plastic basket", "match": ["basket", "bin", "tray"], "categories": ["household", "crafts"], "quantity": [1, 1], "must": false },
+        { "name": "chalk", "match": ["chalk", "wax", "soap"], "categories": ["crafts"], "quantity": [1, 3], "must": false }
+      ]
+    },
+    {
+      "id": "paint-cans", "kind": "repeated",
+      "items": [
+        { "name": "quart paint cans", "match": ["paint", "can"], "categories": ["paint", "household", "tools"], "quantity": [5, 5], "must": true, "longestCm": [9, 16] },
+        { "name": "lids", "match": ["lid"], "categories": ["paint", "household"], "quantity": [1, 6], "must": false },
+        { "name": "cardboard box", "match": ["box", "carton"], "categories": ["household"], "quantity": [1, 1], "must": false }
+      ]
+    },
+    {
+      "id": "lawn-mower", "kind": "bulky",
+      "items": [
+        { "name": "push lawn mower", "match": ["mower"], "categories": ["garden", "outdoor", "tools"], "quantity": [1, 1], "must": true, "bulky": true }
+      ]
+    },
+    {
+      "id": "usb-charger", "kind": "multi",
+      "items": [
+        { "name": "USB wall charger", "match": ["charger", "adapter", "plug", "power brick"], "categories": ["electronics"], "quantity": [1, 1], "must": true, "longestCm": [3, 8] },
+        { "name": "multi-tip USB charging cable", "match": ["cable", "cord"], "categories": ["electronics"], "quantity": [1, 1], "must": true }
+      ]
+    },
+    {
+      "id": "first-aid-kit", "kind": "single",
+      "items": [
+        { "name": "first aid bag", "match": ["first aid", "first-aid", "medical", "trauma", "emergency", "kit", "bag"], "categories": ["first-aid"], "quantity": [1, 1], "must": true },
+        { "name": "box of gloves", "match": ["glove"], "categories": ["first-aid", "household"], "quantity": [1, 1], "must": false },
+        { "name": "gauze and bandages", "match": ["gauze", "bandage", "dressing"], "categories": ["first-aid"], "quantity": [1, 10], "must": false }
+      ]
+    },
+    {
+      "id": "flashlight", "kind": "single",
+      "items": [
+        { "name": "small LED flashlight", "match": ["flashlight", "torch", "light"], "categories": ["tools", "electronics", "outdoor", "household"], "quantity": [1, 1], "must": true, "longestCm": [5, 12] }
+      ]
+    },
+    {
+      "id": "cable-reel", "kind": "single",
+      "items": [
+        { "name": "extension cord reel", "match": ["reel", "extension", "cord", "cable"], "categories": ["electronics", "tools", "hardware"], "quantity": [1, 1], "must": true }
+      ]
+    },
+    {
+      "id": "board-game", "kind": "label",
+      "items": [
+        { "name": "Just One board game", "match": ["just one"], "categories": ["games"], "quantity": [1, 1], "must": true },
+        { "name": "dry-erase markers", "match": ["marker", "pen"], "categories": ["games", "office"], "quantity": [5, 8], "must": false },
+        { "name": "game cards", "match": ["card"], "categories": ["games"], "quantity": [1, 110], "must": false },
+        { "name": "rulebook", "match": ["rule", "instruction", "booklet"], "categories": ["games", "books-media"], "quantity": [1, 1], "must": false },
+        { "name": "card easels", "match": ["easel", "stand", "holder", "card"], "categories": ["games"], "quantity": [1, 7], "must": false }
+      ]
+    },
+    {
+      "id": "tape-and-books", "kind": "multi",
+      "items": [
+        { "name": "stack of books", "match": ["book"], "categories": ["books-media"], "quantity": [3, 6], "must": true },
+        { "name": "tape measure", "match": ["tape", "measure", "ruler"], "categories": ["tools"], "quantity": [1, 1], "must": true }
+      ]
+    }
+  ]
+}

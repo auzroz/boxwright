@@ -364,6 +364,26 @@ Three details it gets deliberately right:
 - Unspecified `heavySafe` / `fragileSafe` are left unwritten, not defaulted to
   false. Absent means unknown; false is a permanent exclusion.
 
+## Which vision model
+
+Measured, not argued: `make identeval` (backend/cmd/identeval) puts every
+configuration in its matrix through the production provider against 20
+labelled photos and scores what each finds. The latest run, and how to repeat
+it when a model is released, is in [IDENTIFICATION.md](IDENTIFICATION.md).
+
+As of 2026-09-30 the Anthropic default is `claude-sonnet-5-5` at its own
+effort, with adaptive thinking: every labelled item found, $0.016 a photo.
+Opus 5 and 5.5 were less complete, slower, dearer, and sometimes answered a
+crowded photo with a single placeholder item.
+
+How much a model thinks is set per model family (internal/ai/tuning.go):
+`AI_THINKING=auto` is what the eval found best for the family, `least` the
+least it accepts (`disabled` on the 5 generation, `between_tools` on Sonnet
+5.5; Opus 5.5 cannot turn it off), `adaptive` lets the model decide.
+`AI_EFFORT` passes `output_config.effort` through where the model takes it.
+A model not in the table gets the old request, with a single retry if it
+rejects the thinking parameter.
+
 ## Local model guidance (Ollama)
 
 - `gemma3:4b` — easiest setup, ~3 GB at Q4, decent household object ID.
@@ -377,7 +397,10 @@ treats identification as a draft for human review, never autonomous.
 ## Mobile
 
 Bare React Native with a committed `app/ios/` Xcode project; no Expo modules
-and no Expo services. The app is one `App.tsx` plus the modules in `app/src/`,
+and no Expo services. `App.tsx` holds the capture state and routes between
+the screens in `app/src/screens/`, with shared pieces in `src/components/` and
+the Direction A primitives in `src/ui/` and `src/theme/`; the rest of the
+logic is the modules in `app/src/`,
 with the server settings in `src/ConnectionScreen.tsx`. It has grown past what
 a single file wants to be; splitting into screens plus a navigation library is
 the obvious next refactor, and the step machine below is the seam to split on.

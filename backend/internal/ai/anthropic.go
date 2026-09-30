@@ -20,9 +20,13 @@ const (
 	// proxy, gateway or on-prem relay works without patching the provider.
 	anthropicDefaultBaseURL = "https://api.anthropic.com"
 
-	// anthropicDefaultModel is Claude Opus 5 ($5/$25 per Mtok). Aliases carry
-	// no date suffix -- appending one pins a snapshot that eventually retires.
-	anthropicDefaultModel = "claude-opus-5"
+	// anthropicDefaultModel is Claude Sonnet 5.5 ($2/$10 per Mtok), chosen by
+	// cmd/identeval on 2026-09-30: it found every labelled item, returned no
+	// placeholder answers, and cost less than half of Claude Opus 5 -- which
+	// found 88% and twice answered a crowded photo with one item named
+	// "placeholder". docs/IDENTIFICATION.md has the table; re-run it when a
+	// model is released rather than editing this by hand.
+	anthropicDefaultModel = "claude-sonnet-5-5"
 
 	// anthropicVersion is the required API version header, not a model version.
 	anthropicVersion = "2023-06-01"
@@ -34,6 +38,15 @@ const (
 	// a reservation -- unused headroom costs nothing -- so it is sized for the
 	// case this feature exists to serve rather than the common one.
 	anthropicMaxTokens = 8192
+
+	// anthropicMaxTokensThinking is the ceiling when the model may think:
+	// thinking counts toward max_tokens, and running out mid-list loses the
+	// whole capture.
+	anthropicMaxTokensThinking = 16000
+
+	// anthropicTimeout bounds one call. A dense shelf at a higher effort can
+	// think for a minute before it writes anything.
+	anthropicTimeout = 180 * time.Second
 )
 
 // anthropicProvider speaks the Anthropic Messages API directly over net/http.
@@ -44,21 +57,25 @@ type anthropicProvider struct {
 	baseURL string // e.g. https://api.anthropic.com (no trailing /v1)
 	apiKey  string
 	model   string
+	tuning  tuning
 }
 
 func (p *anthropicProvider) Identify(ctx context.Context, image []byte, mimeType string, categories []placement.Category) ([]placement.ItemDraft, error) {
 	return p.identify(ctx, p.requestBody(image, mimeType, categories), false)
 }
 
-// thinkingOff declines extended thinking. See requestBody for the measurement.
-var thinkingOff = map[string]any{"type": "disabled"}
-
 func (p *anthropicProvider) requestBody(image []byte, mimeType string, categories []placement.Category) map[string]any {
+	plan := planFor(p.model, p.tuning)
+	outputConfig := map[string]any{"format": itemDraftFormat()}
+	if plan.effort != "" {
+		outputConfig["effort"] = plan.effort
+	}
 	reqBody := map[string]any{
 		"model":      p.model,
-		"max_tokens": anthropicMaxTokens,
-		// Extended thinking is declined, and it is worth saying why because
-		// the default is the other way.
+		"max_tokens": plan.maxTokens,
+		// By default thinking is kept to the least the model allows (see
+		// planFor), and it is worth saying why because the default is the
+		// other way.
 		//
 		// This is extraction against a fixed schema, not a problem: the model
 		// looks at a photo and writes down what is in it. Measured on one
@@ -71,7 +88,9 @@ func (p *anthropicProvider) requestBody(image []byte, mimeType string, categorie
 		// 72-77, so declining thinking buys tokens, not speed. A 16-item photo
 		// takes over a minute either way, which is the number to watch when
 		// somebody is standing in a storage unit waiting to file a box.
-		"thinking": thinkingOff,
+		//
+		// Measured on Claude Opus 5 and Sonnet 5; cmd/identeval re-measures
+		// it for each new model (AI_THINKING=adaptive turns it on).
 		"messages": []map[string]any{
 			{
 				"role": "user",
@@ -92,9 +111,11 @@ func (p *anthropicProvider) requestBody(image []byte, mimeType string, categorie
 		// the bare object the other providers have to be defended against.
 		// parseDrafts still runs: the schema guarantees shape, never
 		// vocabulary.
-		"output_config": map[string]any{"format": itemDraftFormat()},
+		"output_config": outputConfig,
 	}
-
+	if plan.thinking != nil {
+		reqBody["thinking"] = plan.thinking
+	}
 	return reqBody
 }
 
@@ -116,7 +137,7 @@ func (p *anthropicProvider) identify(ctx context.Context, reqBody map[string]any
 		req.Header.Set("x-api-key", p.apiKey)
 	}
 
-	client := &http.Client{Timeout: 120 * time.Second}
+	client := &http.Client{Timeout: anthropicTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request: %w", err)
@@ -133,6 +154,9 @@ func (p *anthropicProvider) identify(ctx context.Context, reqBody map[string]any
 			slog.Default().Warn("anthropic rejected the thinking parameter; retrying without it "+
 				"(replies will cost more and take longer on this model)", "model", p.model)
 			delete(reqBody, "thinking")
+			if u := usageFrom(ctx); u != nil {
+				u.RetriedWithoutThinking = true
+			}
 			return p.identify(ctx, reqBody, true)
 		}
 		return nil, fmt.Errorf("anthropic request: status %d: %s", resp.StatusCode, string(body))
@@ -164,6 +188,12 @@ func (p *anthropicProvider) identify(ctx context.Context, reqBody map[string]any
 	// Tokens are what the API reports; the dollar figure is derived and says
 	// so, because a price list in a source file goes stale silently.
 	out.Usage.log(p.model)
+	if u := usageFrom(ctx); u != nil {
+		u.Model = p.model
+		u.InputTokens = out.Usage.InputTokens + out.Usage.CacheCreationTokens + out.Usage.CacheReadTokens
+		u.OutputTokens = out.Usage.OutputTokens
+		u.USD, u.PriceKnown = out.Usage.cost(p.model)
+	}
 
 	// A refusal is HTTP 200 with no usable answer, so it must be checked before
 	// content is read. Wrapping ErrNoProvider degrades it to the manual-entry
@@ -186,7 +216,7 @@ func (p *anthropicProvider) identify(ctx context.Context, reqBody map[string]any
 		// Truncated JSON would otherwise surface as an unparseable-draft error
 		// that points at the model instead of at the token budget.
 		return nil, fmt.Errorf(
-			"anthropic reply hit the %d-token limit before finishing the draft", anthropicMaxTokens)
+			"anthropic reply hit the %v-token limit before finishing the draft", reqBody["max_tokens"])
 	}
 	return parseDrafts(text)
 }
@@ -203,11 +233,15 @@ type anthropicUsage struct {
 // this project documents. Deliberately partial: a model that is not here logs
 // its tokens and no dollar figure, which is better than a confident number
 // derived from a guess.
+//
+// Longest prefix wins, so claude-opus-5-5 is never priced as claude-opus-5.
 var anthropicPricing = map[string][2]float64{
-	"claude-opus-5":    {5, 25},
-	"claude-sonnet-5":  {2, 10},
-	"claude-haiku-4-5": {1, 5},
-	"claude-fable-5-1": {5, 25},
+	"claude-fable-5-1":  {10, 50},
+	"claude-opus-5-5":   {4, 20},
+	"claude-sonnet-5-5": {2, 10},
+	"claude-opus-5":     {5, 25},
+	"claude-sonnet-5":   {2, 10},
+	"claude-haiku-4-5":  {1, 5},
 }
 
 // log records what one call used, and what that is worth if we know the price.
@@ -221,28 +255,38 @@ func (u anthropicUsage) log(model string) {
 		attrs = append(attrs, "cacheReadTokens", u.CacheReadTokens,
 			"cacheCreationTokens", u.CacheCreationTokens)
 	}
-	// Match a dated snapshot (claude-haiku-4-5-20251001) to its alias, so
-	// pinning a version does not silently lose the price.
-	price, known := anthropicPricing[model]
-	if !known {
-		for alias, p := range anthropicPricing {
-			if strings.HasPrefix(model, alias) {
-				price, known = p, true
-				break
-			}
-		}
-	}
-	if known {
-		// Cache reads are billed at a tenth; cache writes at 1.25x. Neither is
-		// used here today, but counting them at the input rate would overstate
-		// the bill the day someone turns caching on.
-		usd := (float64(u.InputTokens)*price[0] +
-			float64(u.CacheCreationTokens)*price[0]*1.25 +
-			float64(u.CacheReadTokens)*price[0]*0.1 +
-			float64(u.OutputTokens)*price[1]) / 1e6
+	if usd, known := u.cost(model); known {
 		attrs = append(attrs, "estimatedUSD", fmt.Sprintf("%.5f", usd))
 	}
 	slog.Default().Info("anthropic call", attrs...)
+}
+
+// cost is what the call was worth at list price, when the model is priced.
+func (u anthropicUsage) cost(model string) (float64, bool) {
+	price, known := priceFor(model)
+	if !known {
+		return 0, false
+	}
+	// Cache reads are billed at a tenth; cache writes at 1.25x. Neither is
+	// used here today, but counting them at the input rate would overstate
+	// the bill the day someone turns caching on.
+	return (float64(u.InputTokens)*price[0] +
+		float64(u.CacheCreationTokens)*price[0]*1.25 +
+		float64(u.CacheReadTokens)*price[0]*0.1 +
+		float64(u.OutputTokens)*price[1]) / 1e6, true
+}
+
+// priceFor matches a model, or a dated snapshot of one
+// (claude-haiku-4-5-20251001), to the LONGEST priced prefix, so pinning a
+// version keeps its price and claude-opus-5-5 is never priced as claude-opus-5.
+func priceFor(model string) ([2]float64, bool) {
+	best, found := "", false
+	for alias := range anthropicPricing {
+		if strings.HasPrefix(model, alias) && len(alias) > len(best) {
+			best, found = alias, true
+		}
+	}
+	return anthropicPricing[best], found
 }
 
 // anthropicBlock is one element of the response content array. Only text
