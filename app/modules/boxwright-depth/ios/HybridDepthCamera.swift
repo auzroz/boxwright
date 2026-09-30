@@ -40,6 +40,7 @@ class HybridDepthCamera: HybridDepthCameraSpec {
   }
 
   var onStatus: ((_ status: DepthStatus) -> Void)?
+  var onSessionEvent: ((_ event: DepthSessionEvent) -> Void)?
 
   // MARK: View
 
@@ -165,6 +166,17 @@ class HybridDepthCamera: HybridDepthCameraSpec {
   }
 
   // MARK: Status
+
+  /// A failure ends the session: no more frames, so no more status. Without
+  /// this the screen said "Starting the camera..." for ever.
+  fileprivate func didFail(_ error: Error) {
+    let denied = (error as? ARError)?.code == .cameraUnauthorized
+    onSessionEvent?(DepthSessionEvent(state: .failed, message: error.localizedDescription, cameraDenied: denied))
+  }
+
+  fileprivate func didInterrupt(_ interrupted: Bool) {
+    onSessionEvent?(DepthSessionEvent(state: interrupted ? .interrupted : .resumed, message: nil, cameraDenied: false))
+  }
 
   /// Called by the relay on the session's delegate queue (main).
   fileprivate func didUpdate(_ frame: ARFrame) {
@@ -295,5 +307,17 @@ private final class StatusRelay: NSObject, ARSessionDelegate {
 
   func session(_ session: ARSession, didUpdate frame: ARFrame) {
     owner?.didUpdate(frame)
+  }
+
+  func session(_ session: ARSession, didFailWithError error: Error) {
+    owner?.didFail(error)
+  }
+
+  func sessionWasInterrupted(_ session: ARSession) {
+    owner?.didInterrupt(true)
+  }
+
+  func sessionInterruptionEnded(_ session: ARSession) {
+    owner?.didInterrupt(false)
   }
 }

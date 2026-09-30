@@ -17,6 +17,8 @@
 namespace margelo::nitro::boxwrightdepth { enum class DepthCameraMode; }
 // Forward declaration of `DepthStatus` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthStatus; }
+// Forward declaration of `DepthSessionEvent` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { struct DepthSessionEvent; }
 // Forward declaration of `DepthCapture` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
 
@@ -24,6 +26,7 @@ namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
 #include "DepthStatus.hpp"
 #include <functional>
 #include <optional>
+#include "DepthSessionEvent.hpp"
 #include "DepthCapture.hpp"
 #include <NitroModules/Promise.hpp>
 
@@ -62,6 +65,8 @@ namespace margelo::nitro::boxwrightdepth {
       virtual void setTorch(bool torch) = 0;
       virtual std::optional<std::function<void(const DepthStatus& /* status */)>> getOnStatus() = 0;
       virtual void setOnStatus(const std::optional<std::function<void(const DepthStatus& /* status */)>>& onStatus) = 0;
+      virtual std::optional<std::function<void(const DepthSessionEvent& /* event */)>> getOnSessionEvent() = 0;
+      virtual void setOnSessionEvent(const std::optional<std::function<void(const DepthSessionEvent& /* event */)>>& onSessionEvent) = 0;
 
     public:
       // Methods

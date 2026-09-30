@@ -8,6 +8,7 @@
     "active": true,
     "torch": true,
     "onStatus": true,
+    "onSessionEvent": true,
     "hybridRef": true
   }
 }

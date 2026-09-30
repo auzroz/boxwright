@@ -13,8 +13,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `CameraAccess` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class CameraAccess; }
 
-
+#include "CameraAccess.hpp"
 #include <NitroModules/ArrayBuffer.hpp>
 #include <NitroModules/Promise.hpp>
 #include <string>
@@ -47,6 +49,7 @@ namespace margelo::nitro::boxwrightdepth {
     public:
       // Properties
       virtual bool getIsSupported() = 0;
+      virtual CameraAccess getCameraAccess() = 0;
 
     public:
       // Methods

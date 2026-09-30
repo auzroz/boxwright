@@ -14,6 +14,7 @@ public protocol HybridDepthCameraSpec_protocol: HybridObject, HybridView {
   var active: Bool { get set }
   var torch: Bool { get set }
   var onStatus: ((_ status: DepthStatus) -> Void)? { get set }
+  var onSessionEvent: ((_ event: DepthSessionEvent) -> Void)? { get set }
 
   // Methods
   func capture() throws -> Promise<DepthCapture>

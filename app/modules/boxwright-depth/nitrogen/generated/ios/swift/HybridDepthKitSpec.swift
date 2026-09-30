@@ -11,6 +11,7 @@ import NitroModules
 public protocol HybridDepthKitSpec_protocol: HybridObject {
   // Properties
   var isSupported: Bool { get }
+  var cameraAccess: CameraAccess { get }
 
   // Methods
   func readFile(path: String) throws -> Promise<ArrayBuffer>

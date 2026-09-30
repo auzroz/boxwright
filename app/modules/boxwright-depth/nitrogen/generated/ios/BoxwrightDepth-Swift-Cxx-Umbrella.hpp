@@ -8,10 +8,16 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `CameraAccess` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class CameraAccess; }
 // Forward declaration of `DepthCameraMode` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { enum class DepthCameraMode; }
 // Forward declaration of `DepthCapture` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
+// Forward declaration of `DepthSessionEvent` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { struct DepthSessionEvent; }
+// Forward declaration of `DepthSessionState` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class DepthSessionState; }
 // Forward declaration of `DepthStatus` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthStatus; }
 // Forward declaration of `DepthTracking` to properly resolve imports.
@@ -22,8 +28,11 @@ namespace margelo::nitro::boxwrightdepth { class HybridDepthCameraSpec; }
 namespace margelo::nitro::boxwrightdepth { class HybridDepthKitSpec; }
 
 // Include C++ defined types
+#include "CameraAccess.hpp"
 #include "DepthCameraMode.hpp"
 #include "DepthCapture.hpp"
+#include "DepthSessionEvent.hpp"
+#include "DepthSessionState.hpp"
 #include "DepthStatus.hpp"
 #include "DepthTracking.hpp"
 #include "HybridDepthCameraSpec.hpp"

@@ -127,6 +127,13 @@ open class HybridDepthKitSpec_cxx {
       return self.__implementation.isSupported
     }
   }
+  
+  public final var cameraAccess: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.cameraAccess.rawValue
+    }
+  }
 
   // Methods
   @inline(__always)

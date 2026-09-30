@@ -12,9 +12,12 @@
 // Forward declaration of `HybridDepthKitSpec_cxx` to properly resolve imports.
 namespace BoxwrightDepth { class HybridDepthKitSpec_cxx; }
 
+// Forward declaration of `CameraAccess` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class CameraAccess; }
 // Forward declaration of `ArrayBufferHolder` to properly resolve imports.
 namespace NitroModules { class ArrayBufferHolder; }
 
+#include "CameraAccess.hpp"
 #include <NitroModules/ArrayBuffer.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/ArrayBufferHolder.hpp>
@@ -68,6 +71,10 @@ namespace margelo::nitro::boxwrightdepth {
     // Properties
     inline bool getIsSupported() noexcept override {
       return _swiftPart.isSupported();
+    }
+    inline CameraAccess getCameraAccess() noexcept override {
+      auto __result = _swiftPart.getCameraAccess();
+      return static_cast<CameraAccess>(__result);
     }
 
   public:

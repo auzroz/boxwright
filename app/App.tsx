@@ -5,6 +5,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import type { ImagePickerResponse } from "react-native-image-picker";
 import { DepthKit } from "boxwright-depth";
+import { cameraFor } from "./src/depthFallback";
 import type { DepthCapture } from "boxwright-depth";
 
 import { catalog, entryError, errorMessage, identify, isRetriable, landed, recommend } from "./src/api";
@@ -499,7 +500,7 @@ function Main() {
    * else, and whenever the user asks for it, the system camera as before.
    */
   function takePhoto(): Promise<void> {
-    if (DepthKit.isSupported) {
+    if (cameraFor(DepthKit) === "depth") {
       setDepthCamera(true);
       return Promise.resolve();
     }

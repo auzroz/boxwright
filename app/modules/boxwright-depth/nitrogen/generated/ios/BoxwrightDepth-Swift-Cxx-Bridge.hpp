@@ -12,6 +12,10 @@
 namespace NitroModules { class ArrayBufferHolder; }
 // Forward declaration of `DepthCapture` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthCapture; }
+// Forward declaration of `DepthSessionEvent` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { struct DepthSessionEvent; }
+// Forward declaration of `DepthSessionState` to properly resolve imports.
+namespace margelo::nitro::boxwrightdepth { enum class DepthSessionState; }
 // Forward declaration of `DepthStatus` to properly resolve imports.
 namespace margelo::nitro::boxwrightdepth { struct DepthStatus; }
 // Forward declaration of `DepthTracking` to properly resolve imports.
@@ -29,6 +33,8 @@ namespace BoxwrightDepth { class HybridDepthKitSpec_cxx; }
 
 // Include C++ defined types
 #include "DepthCapture.hpp"
+#include "DepthSessionEvent.hpp"
+#include "DepthSessionState.hpp"
 #include "DepthStatus.hpp"
 #include "DepthTracking.hpp"
 #include "HybridDepthCameraSpec.hpp"
@@ -114,6 +120,43 @@ namespace margelo::nitro::boxwrightdepth::bridge::swift {
     return optional.has_value();
   }
   inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::function<void(const DepthSessionEvent& /* event */)>
+  /**
+   * Specialized version of `std::function<void(const DepthSessionEvent&)>`.
+   */
+  using Func_void_DepthSessionEvent = std::function<void(const DepthSessionEvent& /* event */)>;
+  /**
+   * Wrapper class for a `std::function<void(const DepthSessionEvent& / * event * /)>`, this can be used from Swift.
+   */
+  class Func_void_DepthSessionEvent_Wrapper final {
+  public:
+    explicit Func_void_DepthSessionEvent_Wrapper(std::function<void(const DepthSessionEvent& /* event */)>&& func): _function(std::make_unique<std::function<void(const DepthSessionEvent& /* event */)>>(std::move(func))) {}
+    inline void call(DepthSessionEvent event) const noexcept {
+      _function->operator()(event);
+    }
+  private:
+    std::unique_ptr<std::function<void(const DepthSessionEvent& /* event */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_DepthSessionEvent create_Func_void_DepthSessionEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_DepthSessionEvent_Wrapper wrap_Func_void_DepthSessionEvent(Func_void_DepthSessionEvent value) noexcept {
+    return Func_void_DepthSessionEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::function<void(const DepthSessionEvent& /* event */)>>
+  /**
+   * Specialized version of `std::optional<std::function<void(const DepthSessionEvent& / * event * /)>>`.
+   */
+  using std__optional_std__function_void_const_DepthSessionEvent_____event______ = std::optional<std::function<void(const DepthSessionEvent& /* event */)>>;
+  inline std::optional<std::function<void(const DepthSessionEvent& /* event */)>> create_std__optional_std__function_void_const_DepthSessionEvent_____event______(const std::function<void(const DepthSessionEvent& /* event */)>& value) noexcept {
+    return std::optional<std::function<void(const DepthSessionEvent& /* event */)>>(value);
+  }
+  inline bool has_value_std__optional_std__function_void_const_DepthSessionEvent_____event______(const std::optional<std::function<void(const DepthSessionEvent& /* event */)>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::function<void(const DepthSessionEvent& /* event */)> get_std__optional_std__function_void_const_DepthSessionEvent_____event______(const std::optional<std::function<void(const DepthSessionEvent& /* event */)>>& optional) noexcept {
     return optional.value();
   }
   

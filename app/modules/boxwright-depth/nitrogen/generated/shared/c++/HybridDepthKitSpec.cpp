@@ -15,6 +15,7 @@ namespace margelo::nitro::boxwrightdepth {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridGetter("isSupported", &HybridDepthKitSpec::getIsSupported);
+      prototype.registerHybridGetter("cameraAccess", &HybridDepthKitSpec::getCameraAccess);
       prototype.registerHybridMethod("readFile", &HybridDepthKitSpec::readFile);
     });
   }

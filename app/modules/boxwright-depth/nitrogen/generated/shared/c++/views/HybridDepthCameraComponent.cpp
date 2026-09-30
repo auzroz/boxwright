@@ -24,6 +24,7 @@ namespace margelo::nitro::boxwrightdepth::views {
     active(nitro::ReactProp<bool>::fromRawValue("DepthCamera", "active", rawProps, sourceProps.active)),
     torch(nitro::ReactProp<bool>::fromRawValue("DepthCamera", "torch", rawProps, sourceProps.torch)),
     onStatus(nitro::ReactProp<std::optional<std::function<void(const DepthStatus& /* status */)>>>::fromRawValue("DepthCamera", "onStatus", rawProps, sourceProps.onStatus)),
+    onSessionEvent(nitro::ReactProp<std::optional<std::function<void(const DepthSessionEvent& /* event */)>>>::fromRawValue("DepthCamera", "onSessionEvent", rawProps, sourceProps.onSessionEvent)),
     hybridRef(nitro::ReactProp<std::optional<std::function<void(const std::shared_ptr<HybridDepthCameraSpec>& /* ref */)>>>::fromRawValue("DepthCamera", "hybridRef", rawProps, sourceProps.hybridRef)) { }
 
   bool HybridDepthCameraProps::filterObjectKeys(const std::string& propName) {
@@ -32,6 +33,7 @@ namespace margelo::nitro::boxwrightdepth::views {
       case hashString("active"): return true;
       case hashString("torch"): return true;
       case hashString("onStatus"): return true;
+      case hashString("onSessionEvent"): return true;
       case hashString("hybridRef"): return true;
       default: return false;
     }

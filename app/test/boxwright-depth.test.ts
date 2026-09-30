@@ -31,11 +31,14 @@ test("the fake exports every value the real module does", () => {
 test("the real view is registered under the name the native side uses, with its props", () => {
   const view = real.DepthCamera as unknown as { name: string; config: { validAttributes: Record<string, unknown> } };
   expect(view.name).toBe("DepthCamera");
-  expect(Object.keys(view.config.validAttributes).sort()).toEqual(["active", "hybridRef", "mode", "onStatus", "torch"]);
+  expect(Object.keys(view.config.validAttributes).sort()).toEqual(["active", "hybridRef", "mode", "onSessionEvent", "onStatus", "torch"]);
 });
 
 test("without the native side, the real module says unsupported rather than crashing", async () => {
   expect(real.DepthKit.isSupported).toBe(false);
+  // Unknown, so the system camera asks for itself as it always has.
+  expect(real.DepthKit.cameraAccess).toBe("undetermined");
+  expect(fake.DepthKit.cameraAccess).toBe("undetermined");
   await expect(real.DepthKit.readFile("/tmp/a.depth")).rejects.toThrow(/not available/);
 });
 

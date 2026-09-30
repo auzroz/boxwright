@@ -23,6 +23,14 @@ namespace margelo::nitro::boxwrightdepth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const DepthSessionEvent& /* event */)>
+  Func_void_DepthSessionEvent create_Func_void_DepthSessionEvent(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = BoxwrightDepth::Func_void_DepthSessionEvent::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const DepthSessionEvent& event) mutable -> void {
+      swiftClosure.call(event);
+    };
+  }
+  
   // pragma MARK: std::function<void(const DepthCapture& /* result */)>
   Func_void_DepthCapture create_Func_void_DepthCapture(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = BoxwrightDepth::Func_void_DepthCapture::fromUnsafe(swiftClosureWrapper);

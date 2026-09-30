@@ -22,6 +22,8 @@ namespace margelo::nitro::boxwrightdepth {
       prototype.registerHybridSetter("torch", &HybridDepthCameraSpec::setTorch);
       prototype.registerHybridGetter("onStatus", &HybridDepthCameraSpec::getOnStatus);
       prototype.registerHybridSetter("onStatus", &HybridDepthCameraSpec::setOnStatus);
+      prototype.registerHybridGetter("onSessionEvent", &HybridDepthCameraSpec::getOnSessionEvent);
+      prototype.registerHybridSetter("onSessionEvent", &HybridDepthCameraSpec::setOnSessionEvent);
       prototype.registerHybridMethod("capture", &HybridDepthCameraSpec::capture);
     });
   }
