@@ -121,3 +121,11 @@ When a model is released:
 
 Results land in `backend/cmd/identeval/results/` (not committed): a `.jsonl`
 of every answer, a `.md` report and a `.summary.json`.
+
+## Run history
+
+Add a line per run; keep the table above for the latest.
+
+| Date | Labels | Calls | Spend | Result |
+|---|---|---|---|---|
+| 2026-09-30 | v2 | 300 (10 configs x 20 photos x 1, top 5 x 2) | $7.45 | Default moved from `claude-opus-5` to `claude-sonnet-5-5` (adaptive). Opus 5/5.5 placeholder answers found |

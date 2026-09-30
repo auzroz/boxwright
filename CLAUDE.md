@@ -72,12 +72,16 @@ backend/    Go 1.23+, stdlib only (no external modules yet)
   internal/placement/   rules-based placement engine + tests
   cmd/bootstrap/        OPTIONAL outline -> Homebox locations
   cmd/corpus/           golden-corpus harness for grading the engine
+  cmd/identeval/        which vision model identifies best: labelled Commons
+                        photos (pinned by sha256, never committed) x the
+                        configs in testdata/matrix.json; `make identeval`
   internal/api/         HTTP handlers, per-Homebox instances + box index cache,
                         location selection, idempotent catalog writes, the
                         change-feed watcher (watch.go)
   internal/bootstrap/   OPTIONAL outline -> Homebox locations (cmd/bootstrap)
 deploy/     kubernetes/ example (one replica, Recreate -- see the file)
 docs/       ARCHITECTURE.md (data flow), HOMEBOX.md (verified API behaviour),
+            IDENTIFICATION.md (the model eval and its latest results),
             RELEASE.md (the v0.1.0 plan and its gates), PRIVACY.md
 ```
 
@@ -107,6 +111,8 @@ one entry landed, never all of them.
 make test          # gofmt -l (fails on any output) + go vet + go test ./...
 make app-test      # the app's jest suite; NOT a dependency of `make test`,
                    # which must run in a checkout with no node_modules
+make identeval     # score every model config (needs AI_API_KEY; ~$0.02/call,
+                   # -max-usd caps it). Results: docs/IDENTIFICATION.md
 make run           # build then run the backend (needs env, see .env.example)
                    # NOT `go run`: it recompiles each start and keeps the
                    # toolchain resident, which on this 16 GB machine already in
