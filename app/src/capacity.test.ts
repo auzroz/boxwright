@@ -1,6 +1,6 @@
 import {
   canHold,
-  fillSummary,
+  fillLabel,
   measuredDims,
   needLitres,
   normalizeDims,
@@ -90,11 +90,20 @@ describe("canHold refuses on facts only, as the engine does", () => {
 });
 
 describe("what the screens say about fill", () => {
-  test("a summary that says how it is known", () => {
-    expect(fillSummary(tote({ fillPct: 40.4, fillSource: "estimated" }))).toBe("about 40% full (estimated)");
-    expect(fillSummary(tote({ fillPct: 60, fillSource: "lidar" }))).toBe("about 60% full (measured)");
-    expect(fillSummary(tote({ fillPct: 10, fillSource: "observed" }))).toBe("about 10% full");
-    expect(fillSummary(tote())).toBeUndefined();
+  test("a label that says how it is known", () => {
+    expect(fillLabel(tote({ fillPct: 40.4, fillSource: "estimated" }))).toBe("~40%, estimate");
+    expect(fillLabel(tote({ fillPct: 60, fillSource: "lidar" }))).toBe("60%, measured");
+    expect(fillLabel(tote({ fillPct: 10, fillSource: "observed" }))).toBe("10% full");
+    expect(fillLabel(tote())).toBe("Not recorded");
+  });
+
+  // Zero is a real fill. It used to read "about 0% full".
+  test("an empty container says so", () => {
+    expect(fillLabel(tote({ fillPct: 0, fillSource: "observed" }))).toBe("Empty");
+    expect(fillLabel(tote({ fillPct: 0, fillSource: "lidar" }))).toBe("Empty");
+    expect(fillLabel(tote({ fillPct: 0, fillSource: "estimated" }))).toBe("Empty, estimated");
+    // A 0 with no source is nobody knowing, not an empty box.
+    expect(fillLabel(tote({ fillPct: 0, fillSource: "" }))).toBe("Not recorded");
   });
 
   test("ask how full it is when nobody knows, or a guess is getting full or stale", () => {

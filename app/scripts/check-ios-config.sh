@@ -75,6 +75,14 @@ for api in ["NSPrivacyAccessedAPICategoryDiskSpace", "NSPrivacyAccessedAPICatego
             "NSPrivacyAccessedAPICategoryUserDefaults", "NSPrivacyAccessedAPICategorySystemBootTime"]:
     check(api in declared, f"privacy manifest declares {api.removeprefix('NSPrivacyAccessedAPICategory')}")
 
+# Bundled fonts are resources, listed by file name. Each one must be in the
+# project's resources (or iOS silently falls back to the system font) and ship
+# with its licence beside it.
+fonts = info.get("UIAppFonts", [])
+fonts_dir = ios.parent / "assets" / "fonts"
+check(all(f in pbx and (fonts_dir / f).exists() for f in fonts), f"bundled fonts are in the project and on disk ({fonts or 'none'})")
+check(not fonts or (fonts_dir / "OFL.txt").exists(), "bundled fonts ship with their licence")
+
 ids = set(re.findall(r"PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);", pbx))
 check(ids == {"app.boxwright"}, f"bundle identifier is app.boxwright everywhere (found {sorted(ids)})")
 families = set(re.findall(r"TARGETED_DEVICE_FAMILY = ([^;]+);", pbx))

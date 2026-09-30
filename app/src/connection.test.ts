@@ -98,6 +98,13 @@ describe("transportWarnings", () => {
     expect(got[0]).toContain("unencrypted");
   });
 
+  test.each(["http://127.0.0.1:8787", "http://localhost:8787", "http://[::1]:8787"])(
+    "http to this phone itself says nothing: %s",
+    (apiUrl) => {
+      expect(transportWarnings(conn({ apiUrl }))).toEqual([]);
+    },
+  );
+
   test("http to a MagicDNS name says iOS will refuse it", () => {
     const got = transportWarnings(conn({ apiUrl: "http://box.tailnet.ts.net:8080" }));
     expect(got).toHaveLength(1);

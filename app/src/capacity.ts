@@ -114,19 +114,17 @@ export function withLitres(b: Box, litres: number | undefined): Box {
   return { ...b, fillPct: fill + (litres / capacity) * 100 };
 }
 
-/** "about 40% full (estimated)", or undefined when nobody knows. */
-export function fillSummary(b: Box): string | undefined {
+/**
+ * The words beside a fill bar. Zero is a real fill and reads "Empty"; nobody
+ * knowing reads "Not recorded". An estimate says it is one.
+ */
+export function fillLabel(b: Box): string {
   const fill = knownFill(b);
-  if (fill === undefined) return undefined;
+  if (fill === undefined) return "Not recorded";
   const pct = Math.round(fill);
-  switch (b.fillSource) {
-    case "estimated":
-      return `about ${pct}% full (estimated)`;
-    case "lidar":
-      return `about ${pct}% full (measured)`;
-    default:
-      return `about ${pct}% full`;
-  }
+  if (b.fillSource === "estimated") return pct <= 0 ? "Empty, estimated" : `~${pct}%, estimate`;
+  if (pct <= 0) return "Empty";
+  return b.fillSource === "lidar" ? `${pct}%, measured` : `${pct}% full`;
 }
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
