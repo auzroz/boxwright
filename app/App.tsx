@@ -60,6 +60,10 @@ import { ConnectionScreen } from "./src/screens/ConnectionScreen";
 import { DoneScreen, InboxScreen, RecommendScreen, ReviewScreen, WaitingScreen } from "./src/screens/CaptureScreens";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { LocationsScreen } from "./src/screens/LocationsScreen";
+import { SetupFlow } from "./src/screens/SetupScreens";
+import { prefs, setPrefs } from "./src/prefs";
+import { startingStep } from "./src/setup";
+import type { SetupStep } from "./src/setup";
 import { forgetHomeboxTheme, refreshHomeboxTheme, useAccent } from "./src/theme/sync";
 import { ThemeProvider } from "./src/theme/ThemeProvider";
 import { palette } from "./src/theme/tokens";
@@ -189,6 +193,32 @@ function Main() {
    * parks it, which is what turns waiting into walking away.
    */
   const [watching, setWatching] = useState("");
+  /**
+   * First-run setup: the step showing, "done" once it is over, null until the
+   * saved connection has been read -- deciding before then would put a
+   * returning user through setup for the moment the Keychain takes.
+   */
+  const [setup, setSetup] = useState<SetupStep | "done" | null>(null);
+  useEffect(() => {
+    if (!server.loaded || setup !== null) return;
+    const start = startingStep(prefs(), isConfigured(server.connection));
+    // Somebody already using the app is recorded as set up, so that losing
+    // the connection later does not send them back through the welcome.
+    if (start === "done" && prefs().setupDone !== true) setPrefs({ setupDone: true });
+    setSetup(start);
+  }, [server.loaded, server.connection, setup]);
+
+  function goSetup(next: SetupStep): void {
+    setPrefs({ setupStep: next });
+    setSetup(next);
+  }
+
+  function finishSetup(photo: boolean): void {
+    setPrefs({ setupDone: true, setupStep: undefined });
+    setSetup("done");
+    exitSetup();
+    if (photo) void takePhoto();
+  }
 
   useEffect(() => {
     loadAll();
@@ -1062,7 +1092,10 @@ function Main() {
   // does rather than as a direction.
 
   function screen() {
-    if (!server.loaded) return <ActivityIndicator style={styles.spinner} size="large" />;
+    if (!server.loaded || setup === null) return <ActivityIndicator style={styles.spinner} size="large" />;
+    if (setup !== "done") {
+      return <SetupFlow step={setup} onStep={goSetup} onConnected={connectionSaved} onFinish={finishSetup} />;
+    }
     if (needsServer || step === "connection") {
       return <ConnectionScreen firstRun={needsServer} onDone={connectionSaved} />;
     }

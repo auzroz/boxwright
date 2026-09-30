@@ -18,6 +18,9 @@ export interface Prefs {
   matchHomebox?: boolean;
   /** The last theme name /status reported; kept so launch is not grey until it answers. */
   homeboxTheme?: string;
+  /** First-run setup: where it got to, and whether it is over. See setup.ts. */
+  setupStep?: string;
+  setupDone?: boolean;
 }
 
 let cached: Prefs | undefined;

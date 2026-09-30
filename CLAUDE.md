@@ -52,6 +52,8 @@ app/        bare React Native (TypeScript), no Expo — capture, review, file
                         is the only colour that can change (ThemeProvider)
   src/draft.ts          the capture under review, pure, shared by the screens
   src/prefs.ts          per-phone preferences (units, colours), one MMKV key
+  src/setup.ts          first-run setup steps; an existing user is never sent
+                        through it (saved connection + no record = done)
   assets/fonts/         Fraunces (SIL OFL) for titles, listed in UIAppFonts
   scripts/              check-ios-config.sh: asserts Info.plist + privacy manifest
 backend/    Go 1.23+, stdlib only (no external modules yet)

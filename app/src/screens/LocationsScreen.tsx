@@ -25,7 +25,15 @@ import { ContainersScreen } from "./ContainersScreen";
  * Whether somewhere is a place you put things is not a fact about its shape.
  * It is a decision, and it is the user's.
  */
-export function LocationsScreen(props: { onDone: () => void }) {
+export function LocationsScreen(props: {
+  onDone: () => void;
+  /**
+   * Inside first-run setup: numbered, back goes to the server step, and at
+   * least one place is required -- with none, every item would come back
+   * "no existing container fits". Sizes are the next step, not a button here.
+   */
+  setup?: { onBack: () => void; step: { index: number; count: number } };
+}) {
   const { accent } = useTheme();
   const [sizing, setSizing] = useState(false);
   const [rows, setRows] = useState<LocationNode[] | null>(null);
@@ -125,12 +133,18 @@ export function LocationsScreen(props: { onDone: () => void }) {
               {pending > 0 ? ` · ${pending} unsaved ${plural(pending, "change", "changes")}` : ""}
             </Text>
           )}
-          <Button label={pending > 0 ? "Save selection" : "Done"} busy={busy} onPress={() => void save()} />
+          <Button
+            label={props.setup ? (chosen === 0 ? "Choose at least one" : "Continue") : pending > 0 ? "Save selection" : "Done"}
+            busy={busy}
+            disabled={props.setup !== undefined && chosen === 0}
+            onPress={() => void save()}
+          />
         </>
       }
     >
       <Header
-        back={{ label: "Back", onPress: props.onDone, disabled: busy }}
+        back={props.setup ? { label: "Server", onPress: props.setup.onBack, disabled: busy } : { label: "Back", onPress: props.onDone, disabled: busy }}
+        step={props.setup?.step}
         title="Where may it file things?"
         subtitle="Tick anywhere you’d actually put something. Boxwright only ever suggests these, and leaves the rest of your Homebox alone."
       />
@@ -186,13 +200,15 @@ export function LocationsScreen(props: { onDone: () => void }) {
         after the selection -- and unsaved ticks must be saved first, or the
         container someone just ticked would be missing from the list.
       */}
-      <Button
-        label={pending > 0 ? "Save your selection to record sizes" : "Record container sizes"}
-        kind="secondary"
-        icon="ruler"
-        disabled={busy || pending > 0}
-        onPress={() => setSizing(true)}
-      />
+      {!props.setup && (
+        <Button
+          label={pending > 0 ? "Save your selection to record sizes" : "Record container sizes"}
+          kind="secondary"
+          icon="ruler"
+          disabled={busy || pending > 0}
+          onPress={() => setSizing(true)}
+        />
+      )}
       {/* For anyone upgrading, and for anyone who filled the capacity and
           access fields in by hand: it never overrides a choice already made. */}
       <Pressable style={styles.link} accessibilityRole="button" disabled={busy} onPress={() => void adopt()}>
